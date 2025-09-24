@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ChatActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Toolbar -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/chatToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@color/green"
+            android:fontFamily="@font/anek_gujarati_bold"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:titleTextColor="@color/white"
+            app:navigationIcon="@drawable/ic_back_arrow"/>
+
+
+        <!-- Messages -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/messagesRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="8dp"
+            tools:ignore="ContentDescription" />
+
+        <!-- Input Area -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#F2F2F2"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="6dp">
+
+            <!-- EditText + Attach buttons -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <EditText
+                    android:id="@+id/messageInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:fontFamily="@font/anek_gujarati"
+                    android:hint="Type a message"
+                    android:maxLines="6"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="10dp"
+                    android:paddingEnd="110dp"
+                    android:textColor="@color/black"
+                    android:textColorHint="#8A000000"
+                    android:textSize="18sp" />
+
+                <!-- Attachment button -->
+                <ImageButton
+                    android:id="@+id/attachButton"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="60dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_attach"
+                    android:contentDescription="Attach File"
+                    app:tint="@color/green"/>
+
+                <!-- Camera button -->
+                <ImageButton
+                    android:id="@+id/attachImageButton"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="5dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_camera"
+                    android:contentDescription="Attach Image"
+                    app:tint="@color/green"/>
+
+            </FrameLayout>
+
+            <!-- Send button -->
+            <ImageButton
+                android:id="@+id/sendButton"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@drawable/ic_send"
+                app:tint="@color/green"
+                android:contentDescription="@string/send"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

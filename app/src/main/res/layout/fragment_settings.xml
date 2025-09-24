@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/pastel_purple"
+    tools:context=".SettingsFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:paddingBottom="24dp"
+            android:text="Settings"
+            android:fontFamily="@font/anek_gujarati_bold"
+            android:textColor="@color/black"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Allow Notifications"
+                android:fontFamily="@font/anek_gujarati_semibold"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <Switch
+                android:id="@+id/switchNotifications"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:minWidth="48dp"
+                android:padding="8dp"/>
+        </LinearLayout>
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="12dp"
+            android:background="#CCCCCC" />
+
+        <!-- Change Password -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnChangePassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="@color/green"
+            android:fontFamily="@font/anek_gujarati_semibold"
+            android:paddingVertical="14dp"
+            android:text="Change Password"
+            android:textColor="@color/black"
+            app:cornerRadius="10dp" />
+
+        <!-- Profile Settings -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnProfileSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="@color/green"
+            android:paddingVertical="14dp"
+            android:text="Profile Settings"
+            android:textColor="@color/black"
+            android:fontFamily="@font/anek_gujarati_semibold"
+            app:cornerRadius="10dp" />
+
+        <!-- About App -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAboutApp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="@color/green"
+            android:paddingVertical="14dp"
+            android:text="About App"
+            android:textColor="@color/black"
+            android:fontFamily="@font/anek_gujarati_semibold"
+            app:cornerRadius="10dp" />
+
+        <!-- Logout Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/green"
+            android:paddingVertical="14dp"
+            android:text="Logout"
+            android:fontFamily="@font/anek_gujarati_semibold"
+            android:textColor="@color/black"
+            app:cornerRadius="10dp" />
+    </LinearLayout>
+</ScrollView>

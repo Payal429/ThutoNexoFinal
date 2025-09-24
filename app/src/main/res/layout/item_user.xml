@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:descendantFocusability="blocksDescendants"
+    android:layout_marginBottom="6dp">
+
+    <TextView
+        android:id="@+id/userName"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:fontFamily="@font/anek_gujarati"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/userRole"
+        android:textSize="14sp"
+        android:fontFamily="@font/anek_gujarati"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#555"/>
+
+    <TextView
+        android:id="@+id/userSubjects"
+        android:textSize="12sp"
+        android:fontFamily="@font/anek_gujarati"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#888"/>
+</LinearLayout>

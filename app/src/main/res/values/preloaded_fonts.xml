@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="preloaded_fonts" translatable="false">
+        <item>@font/anek_gujarati</item>
+        <item>@font/anek_gujarati_bold</item>
+        <item>@font/anek_gujarati_light</item>
+        <item>@font/anek_gujarati_semibold</item>
+    </array>
+</resources>

@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ThutoNexo</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="default_web_client_id">447061747743-rkaa17m88c571t26knl0icotpiknbifk.apps.googleusercontent.com</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="send">Send</string>
+</resources>
