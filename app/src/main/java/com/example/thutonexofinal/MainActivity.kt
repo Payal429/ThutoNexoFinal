@@ -10,6 +10,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
+    // Fragment instances (kept in memory for simplicity)
     private val chatListFragment = ChatListFragment()
     private val discoveryFragment = DiscoveryFragment()
     private val profileFragment = ProfileFragment()
@@ -20,12 +21,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // Change status bar color
-        window.statusBarColor = getColor(R.color.light_purple) // your desired color
+        window.statusBarColor = getColor(R.color.light_purple)
 
-        // Optional: make status bar icons dark or light
-        window.decorView.systemUiVisibility = 0 // 0 = light icons, or use SYSTEM_UI_FLAG_LIGHT_STATUS_BAR for dark icons
+        // Make status bar icons dark or light
+        // 0 = light icons, or use SYSTEM_UI_FLAG_LIGHT_STATUS_BAR for dark icons
+        window.decorView.systemUiVisibility = 0
 
-
+        // Bottom-navigation setup
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
         // Determine which fragment to load
@@ -33,12 +35,15 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             if (openChatList) {
                 loadFragment(chatListFragment)
-                bottomNav.selectedItemId = R.id.nav_home // highlight chat tab
+                // highlight chat tab
+                bottomNav.selectedItemId = R.id.nav_home
             } else {
-                loadFragment(chatListFragment) // default
+                // Default
+                loadFragment(chatListFragment)
             }
         }
 
+        // Handle tab selections
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> loadFragment(chatListFragment)
@@ -50,30 +55,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //  Helper: replace fragment in container
     private fun loadFragment(fragment: Fragment): Boolean {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
         return true
     }
-
 }
-/*
-class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-        // Load ChatListFragment
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, ChatListFragment())
-                .commit()
-        }
-    }
-}*/

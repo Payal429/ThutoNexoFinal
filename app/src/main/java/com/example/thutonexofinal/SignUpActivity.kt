@@ -14,7 +14,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class SignUpActivity : AppCompatActivity() {
 
+    // View-binding
     private lateinit var binding: ActivitySignupBinding
+
+    // Firebase
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
 
@@ -23,6 +26,7 @@ class SignUpActivity : AppCompatActivity() {
         binding = ActivitySignupBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Firebase init
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
 
@@ -32,6 +36,7 @@ class SignUpActivity : AppCompatActivity() {
             val email = binding.etSignUpEmail.text.toString().trim()
             val password = binding.etSignUpPassword.text.toString().trim()
 
+            // Basic client-side validation
             if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -43,10 +48,12 @@ class SignUpActivity : AppCompatActivity() {
             }
 
             if (password.length < 6) {
-                Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT)
+                    .show()
                 return@setOnClickListener
             }
 
+            // Check for existing account → create if none
             checkUserExistsAndSignUp(name, email, password)
         }
 
@@ -57,6 +64,7 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
+    // Queries Firebase Auth to see if the email is already registered.
     private fun checkUserExistsAndSignUp(name: String, email: String, password: String) {
         // Check if email is already registered
         auth.fetchSignInMethodsForEmail(email).addOnCompleteListener { task ->
@@ -66,7 +74,8 @@ class SignUpActivity : AppCompatActivity() {
                     // User doesn't exist, create account
                     createUser(name, email, password)
                 } else {
-                    Toast.makeText(this, "User already exists. Please login.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "User already exists. Please login.", Toast.LENGTH_SHORT)
+                        .show()
                 }
             } else {
                 Toast.makeText(this, "Failed to check user existence", Toast.LENGTH_SHORT).show()
@@ -74,6 +83,7 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
+    // Creates Firebase Auth account and writes a minimal user document
     private fun createUser(name: String, email: String, password: String) {
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
             if (task.isSuccessful) {
@@ -84,8 +94,8 @@ class SignUpActivity : AppCompatActivity() {
                     "uid" to userId,
                     "name" to name,
                     "email" to email,
-                    "profileImage" to "", // default empty
-                    "role" to "",         // will be set in ProfileSetupActivity
+                    "profileImage" to "",
+                    "role" to "",
                     "phone" to "",
                     "subjects" to "",
                     "bio" to "",
@@ -102,11 +112,19 @@ class SignUpActivity : AppCompatActivity() {
                             finish()
                         }
                         .addOnFailureListener { e ->
-                            Toast.makeText(this, "Failed to save user: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this,
+                                "Failed to save user: ${e.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                 }
             } else {
-                Toast.makeText(this, "Sign up failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "Sign up failed: ${task.exception?.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }

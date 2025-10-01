@@ -33,6 +33,7 @@ class MessageAdapter(
         notifyDataSetChanged()
     }
 
+    // View-type decision
     override fun getItemViewType(position: Int): Int {
         return when (items[position]) {
             is ChatItem.DateHeader -> VIEW_TYPE_DATE
@@ -43,28 +44,38 @@ class MessageAdapter(
         }
     }
 
+    // ViewHolder creation
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             VIEW_TYPE_SENT -> SentViewHolder(
-                LayoutInflater.from(parent.context).inflate(R.layout.item_message_sent, parent, false)
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_message_sent, parent, false)
             )
+
             VIEW_TYPE_RECEIVED -> ReceivedViewHolder(
-                LayoutInflater.from(parent.context).inflate(R.layout.item_message_received, parent, false)
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_message_received, parent, false)
             )
+
             VIEW_TYPE_DATE -> DateViewHolder(
-                LayoutInflater.from(parent.context).inflate(R.layout.item_date_header, parent, false)
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_date_header, parent, false)
             )
+
             else -> throw IllegalArgumentException("Invalid view type")
         }
     }
 
     override fun getItemCount(): Int = items.size
+
+    // Binding
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (val item = items[position]) {
             is ChatItem.DateHeader -> (holder as DateViewHolder).bind(item)
             is ChatItem.MessageItem -> {
                 val msg = item.message
-                val timeText = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(msg.timestamp))
+                val timeText =
+                    SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(msg.timestamp))
 
                 if (holder is SentViewHolder) {
                     holder.bind(msg.text, msg.imageBase64, timeText)
@@ -76,7 +87,7 @@ class MessageAdapter(
         }
     }
 
-    // ✅ Sent message holder
+    // Sent message holder
     inner class SentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val messageText: TextView = itemView.findViewById(R.id.messageText)
         private val messageTime: TextView = itemView.findViewById(R.id.messageTime)
@@ -86,6 +97,7 @@ class MessageAdapter(
             messageTime.text = time
 
             if (!imageBase64.isNullOrEmpty()) {
+                // Show image, hide text
                 messageImage.visibility = View.VISIBLE
                 messageText.visibility = View.GONE
 
@@ -103,6 +115,7 @@ class MessageAdapter(
                 }
 
             } else {
+                // Show text, hide image
                 messageImage.visibility = View.GONE
                 messageText.visibility = View.VISIBLE
                 messageText.text = text
@@ -110,7 +123,7 @@ class MessageAdapter(
         }
     }
 
-    // ✅ Received message holder
+    // Received message holder
     inner class ReceivedViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val messageText: TextView = itemView.findViewById(R.id.messageText)
         private val messageTime: TextView = itemView.findViewById(R.id.messageTime)
@@ -143,49 +156,11 @@ class MessageAdapter(
         }
     }
 
-    // ✅ Date holder
+    // Date holder
     inner class DateViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val dateText: TextView = itemView.findViewById(R.id.dateText)
         fun bind(item: ChatItem.DateHeader) {
             dateText.text = item.date
         }
     }
-/*    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (val item = items[position]) {
-            is ChatItem.DateHeader -> (holder as DateViewHolder).bind(item)
-            is ChatItem.MessageItem -> {
-                val msg = item.message
-                val timeText = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(msg.timestamp))
-                if (holder is SentViewHolder) {
-                    holder.messageText.text = msg.text
-                    holder.messageTime.text = timeText
-                }
-                if (holder is ReceivedViewHolder) {
-                    holder.messageText.text = msg.text
-                    holder.messageTime.text = timeText
-                }
-            }
-        }
-    }
-
-    inner class SentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val messageText: TextView = itemView.findViewById(R.id.messageText)
-        val messageTime: TextView = itemView.findViewById(R.id.messageTime)
-        val messageImage: ImageView = itemView.findViewById(R.id.messageImage)
-
-    }
-
-    inner class ReceivedViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val messageText: TextView = itemView.findViewById(R.id.messageText)
-        val messageTime: TextView = itemView.findViewById(R.id.messageTime)
-        val messageImage: ImageView = itemView.findViewById(R.id.messageImage)
-
-    }
-
-    inner class DateViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val dateText: TextView = itemView.findViewById(R.id.dateText)
-        fun bind(item: ChatItem.DateHeader) {
-            dateText.text = item.date
-        }
-    }*/
 }

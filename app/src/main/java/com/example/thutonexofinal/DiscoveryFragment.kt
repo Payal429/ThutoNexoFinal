@@ -25,33 +25,34 @@ import com.google.android.material.appbar.MaterialToolbar
 
 class DiscoveryFragment : Fragment() {
 
+    // UI references
     private lateinit var recyclerView: RecyclerView
     private lateinit var searchBar: EditText
     private lateinit var roleSpinner: Spinner
     private lateinit var btnDiscovery: Button
 
+    // Data and adapter
     private lateinit var adapter: UserAdapter
     private val userList = mutableListOf<User>()
     private val db = FirebaseFirestore.getInstance()
     private val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
+    // Fragment life-cycle
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_discovery_activity, container, false)
-
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        /* 1.  MAKE THE TOOLBAR THE ACTION-BAR → title shows  */
+        // Make the toolbar the action bar → title shows
         val toolbar = view.findViewById<MaterialToolbar>(R.id.topAppBar)
         (requireActivity() as androidx.appcompat.app.AppCompatActivity).apply {
             setSupportActionBar(toolbar)
-            supportActionBar?.title = "Discover Chats"   // ← add this line
+            supportActionBar?.title = "Discover Chats"
             supportActionBar?.setDisplayShowTitleEnabled(true)
         }
         // Make toolbar title bold with custom font
@@ -67,12 +68,13 @@ class DiscoveryFragment : Fragment() {
             }
         }
 
+        // View binding
         recyclerView = view.findViewById(R.id.userRecyclerView)
         searchBar = view.findViewById(R.id.searchBar)
         roleSpinner = view.findViewById(R.id.roleSpinner)
         btnDiscovery = view.findViewById(R.id.btnDiscovery)
 
-        // Pass click lambda to open chat
+        // RecyclerView and adapter
         adapter = UserAdapter(requireContext(), userList) { user ->
             openChatWithUser(user.uid, user.name)
         }
@@ -80,22 +82,28 @@ class DiscoveryFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
 
-        // 🔹 Request contacts permission when fragment starts
+        // Request contacts permission when fragment starts
         PermissionHelper.requestContactsPermission(requireActivity())
 
+        // Setup listeners
         setupRoleSpinner()
         fetchUsers()
 
+        // Real-time search while typing
         searchBar.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) { filterUsers() }
+            override fun afterTextChanged(s: Editable?) {
+                filterUsers()
+            }
+
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
+        // Manual filter button (duplicates spinner logic for accessibility)
         btnDiscovery.setOnClickListener { filterUsers() }
-
     }
-    /* ---------------- Handle permission result ---------------- */
+
+    // Handle permission result
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -111,29 +119,48 @@ class DiscoveryFragment : Fragment() {
                     grantResults,
                     onGranted = {
                         // Permission granted, you can optionally do something
-                        Toast.makeText(requireContext(), "Contacts permission granted", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            "Contacts permission granted",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     },
                     onDenied = {
-                        Toast.makeText(requireContext(), "Contacts permission denied", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            "Contacts permission denied",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 )
             }
         }
     }
+
+    // Role spinner (All / Tutor / Student)
     private fun setupRoleSpinner() {
         val roles = listOf("All", "Tutor", "Student")
-        val roleAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, roles)
+        val roleAdapter =
+            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, roles)
         roleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         roleSpinner.adapter = roleAdapter
 
-        roleSpinner.setOnItemSelectedListener(object : android.widget.AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+        roleSpinner.setOnItemSelectedListener(object :
+            android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: android.widget.AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 filterUsers()
             }
+
             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
         })
     }
 
+    //  Load all users once (except self)
     private fun fetchUsers() {
         db.collection("users").get()
             .addOnSuccessListener { result ->
@@ -147,20 +174,21 @@ class DiscoveryFragment : Fragment() {
             .addOnFailureListener { e -> e.printStackTrace() }
     }
 
+    // Filter list by name + role (case-insensitive)
     private fun filterUsers() {
         val query = searchBar.text.toString().lowercase()
         val selectedRole = roleSpinner.selectedItem.toString()
 
         val filteredList = userList.filter { user ->
             val matchesName = user.name.lowercase().contains(query)
-            val matchesRole = selectedRole == "All" || user.role.equals(selectedRole, ignoreCase = true)
+            val matchesRole =
+                selectedRole == "All" || user.role.equals(selectedRole, ignoreCase = true)
             matchesName && matchesRole
         }
-
         adapter.updateList(filteredList)
     }
 
-    // --- New: Open chat and ensure single chatId ---
+    // Open chat and ensure single chatId
     private fun openChatWithUser(otherUserId: String, otherUserName: String) {
         val chatsRef = db.collection("chats")
 
@@ -190,6 +218,7 @@ class DiscoveryFragment : Fragment() {
             }
     }
 
+    // Helper: start ChatActivity with required extras
     private fun startChatActivity(chatId: String, receiverUid: String, receiverName: String) {
         val intent = android.content.Intent(requireContext(), ChatActivity::class.java)
         intent.putExtra("chatId", chatId)

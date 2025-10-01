@@ -18,7 +18,7 @@ object PermissionHelper {
     const val REQUEST_STORAGE = 204
     const val REQUEST_NOTIFICATIONS = 205
 
-    // ---------------- Media Permissions ----------------
+    // Media Permissions
     fun requestImagePermission(activity: Activity) {
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_MEDIA_IMAGES)
             != PackageManager.PERMISSION_GRANTED
@@ -61,7 +61,7 @@ object PermissionHelper {
         }
     }
 
-    // ---------------- Contacts Permission ----------------
+    // Contacts Permission
     fun requestContactsPermission(activity: Activity) {
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_CONTACTS)
             != PackageManager.PERMISSION_GRANTED
@@ -72,11 +72,12 @@ object PermissionHelper {
                 REQUEST_CONTACTS
             )
         } else {
-            Toast.makeText(activity, "Contacts permission already granted", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, "Contacts permission already granted", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
-    // ---------------- Storage (Older Devices) ----------------
+    // Storage (Older Devices)
     fun requestStoragePermission(activity: Activity) {
         val permissions = arrayOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -94,11 +95,12 @@ object PermissionHelper {
                 REQUEST_STORAGE
             )
         } else {
-            Toast.makeText(activity, "Storage permissions already granted", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, "Storage permissions already granted", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
-    // ---------------- Notifications (Android 13+) ----------------
+    // Notifications (Android 13+)
     fun requestNotificationPermission(activity: Activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS)
@@ -110,12 +112,16 @@ object PermissionHelper {
                     REQUEST_NOTIFICATIONS
                 )
             } else {
-                Toast.makeText(activity, "Notification permission already granted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    activity,
+                    "Notification permission already granted",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
 
-    // ---------------- Handle Permission Results ----------------
+    // Handle Permission Results
     fun handlePermissionResult(
         activity: Activity,
         requestCode: Int,

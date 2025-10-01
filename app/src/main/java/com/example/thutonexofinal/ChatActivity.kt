@@ -34,24 +34,32 @@ class ChatActivity : AppCompatActivity() {
 
     // Messages list
     private lateinit var recyclerView: RecyclerView
+
     // Adapter for messages + headers
     private lateinit var adapter: MessageAdapter
+
     // Raw message objects from Firestore
     private val messageList = mutableListOf<Message>()
+
     // Singleton Firestore instance
     private val db = FirebaseFirestore.getInstance()
+
     // Logged-in user UID
     private val currentUserId = FirebaseAuth.getInstance().uid ?: ""
 
     /* Chat meta-data passed via Intent extras */
     // Firestore document id for this chat
     private lateinit var chatId: String
+
     // Other participant (used for 1-to-1)
     private lateinit var receiverUid: String
+
     // Display name in toolbar
     private lateinit var receiverName: String
+
     // Toolbar avatar
     private lateinit var profileImage: ImageView
+
     // Toolbar title
     private lateinit var usernameText: TextView
 
@@ -69,7 +77,8 @@ class ChatActivity : AppCompatActivity() {
         window.statusBarColor = getColor(R.color.green) // your desired color
 
         // Optional: make status bar icons dark or light
-        window.decorView.systemUiVisibility = 0 // 0 = light icons, or use SYSTEM_UI_FLAG_LIGHT_STATUS_BAR for dark icons
+        window.decorView.systemUiVisibility =
+            0 // 0 = light icons, or use SYSTEM_UI_FLAG_LIGHT_STATUS_BAR for dark icons
 
         // Extract Intent extras (finish if missing)
         chatId = intent.getStringExtra("chatId") ?: run { finish(); return }

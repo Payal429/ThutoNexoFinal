@@ -34,7 +34,7 @@ class LoginActivity : AppCompatActivity() {
 
         // Configure Google Sign-In to always show account chooser
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id)) // Needed if using Firebase
+            .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
@@ -102,7 +102,11 @@ class LoginActivity : AppCompatActivity() {
 
                         if (isNewUser) {
                             // First time Google login → go to ProfileSetupActivity
-                            Toast.makeText(this, "Welcome! Please set up your profile.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this,
+                                "Welcome! Please set up your profile.",
+                                Toast.LENGTH_SHORT
+                            ).show()
                             startActivity(Intent(this, ProfileSetupActivity::class.java))
                         } else {
                             // Returning user → go to MainActivity

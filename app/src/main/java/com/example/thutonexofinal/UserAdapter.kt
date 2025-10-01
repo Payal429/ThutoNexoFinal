@@ -8,17 +8,22 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class UserAdapter(
+    // Needed for resources (if any)
     private val context: Context,
+    // Data set
     private var userList: List<User>,
-    private val onUserClick: (User) -> Unit // Lambda to handle clicks
+    // Row-click callback
+    private val onUserClick: (User) -> Unit
 ) : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
+    // View-holder: caches findViewById calls
     inner class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val nameText: TextView = itemView.findViewById(R.id.userName)
         val roleText: TextView = itemView.findViewById(R.id.userRole)
         val subjectText: TextView = itemView.findViewById(R.id.userSubjects)
     }
 
+    // Recycler-view contracts
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_user, parent, false)
@@ -30,6 +35,7 @@ class UserAdapter(
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
         val user = userList[position]
 
+        // Basic info
         holder.nameText.text = user.name
         holder.roleText.text = user.role
 
@@ -48,6 +54,7 @@ class UserAdapter(
         }
     }
 
+    // Public API: update data
     fun updateList(newList: List<User>) {
         userList = newList
         notifyDataSetChanged()

@@ -6,7 +6,7 @@ data class ChatListModel(
     val username: String = "",
     val profileImageBase64: String = "",
     val lastMessage: String = "",
-    val lastMessageType: String = "text", // 🔹 NEW field
+    val lastMessageType: String = "text",
     val timestamp: String = "",
     val unreadCount: Int = 0
 )

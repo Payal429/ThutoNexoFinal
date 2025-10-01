@@ -19,8 +19,6 @@ import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
 import kotlin.jvm.java
 
-//import com.google.firebase.messaging.FirebaseMessaging
-
 class SettingsFragment : Fragment() {
 
     private lateinit var switchNotifications: Switch
@@ -47,44 +45,6 @@ class SettingsFragment : Fragment() {
         // SharedPreferences for storing notification state
         val prefs = requireContext().getSharedPreferences("app_settings", 0)
         switchNotifications.isChecked = prefs.getBoolean("notifications", true)
-
-//        // Permission launcher for Android 13+ notifications
-//        val requestPermissionLauncher = registerForActivityResult(
-//            ActivityResultContracts.RequestPermission()
-//        ) { isGranted ->
-//            if (isGranted) {
-//                enableNotifications(prefs)
-//            } else {
-//                Toast.makeText(requireContext(), "Notifications permission denied", Toast.LENGTH_SHORT).show()
-//                switchNotifications.isChecked = false
-//                prefs.edit().putBoolean("notifications", false).apply()
-//            }
-//        }
-
-//        // Toggle listener for notifications
-//        switchNotifications.setOnCheckedChangeListener { _, isChecked ->
-//            if (isChecked) {
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//                    when {
-//                        ContextCompat.checkSelfPermission(
-//                            requireContext(),
-//                            Manifest.permission.POST_NOTIFICATIONS
-//                        ) == PackageManager.PERMISSION_GRANTED -> enableNotifications(prefs)
-//
-//                        shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
-//                            Toast.makeText(requireContext(), "Please enable notifications in settings", Toast.LENGTH_LONG).show()
-//                            switchNotifications.isChecked = false
-//                        }
-//
-//                        else -> requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-//                    }
-//                } else {
-//                    enableNotifications(prefs) // Android < 13
-//                }
-//            } else {
-//                disableNotifications(prefs)
-//            }
-//        }
 
         // Change password
         btnChangePassword.setOnClickListener {
@@ -124,20 +84,6 @@ class SettingsFragment : Fragment() {
         }
     }
 
-//    // Helper function to enable notifications
-//    private fun enableNotifications(prefs: android.content.SharedPreferences) {
-//        prefs.edit().putBoolean("notifications", true).apply()
-//        FirebaseMessaging.getInstance().subscribeToTopic("all")
-//        Toast.makeText(requireContext(), "Notifications enabled", Toast.LENGTH_SHORT).show()
-//    }
-//
-//    // Helper function to disable notifications
-//    private fun disableNotifications(prefs: android.content.SharedPreferences) {
-//        prefs.edit().putBoolean("notifications", false).apply()
-//        FirebaseMessaging.getInstance().unsubscribeFromTopic("all")
-//        Toast.makeText(requireContext(), "Notifications disabled", Toast.LENGTH_SHORT).show()
-//    }
-
     // Show dialog to change password
     private fun showChangePasswordDialog() {
         val editText = EditText(requireContext())
@@ -149,15 +95,27 @@ class SettingsFragment : Fragment() {
             .setPositiveButton("Update") { _, _ ->
                 val newPassword = editText.text.toString()
                 if (newPassword.length < 6) {
-                    Toast.makeText(requireContext(), "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Password must be at least 6 characters",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@setPositiveButton
                 }
                 FirebaseAuth.getInstance().currentUser?.updatePassword(newPassword)
                     ?.addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            Toast.makeText(requireContext(), "Password updated successfully", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                requireContext(),
+                                "Password updated successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         } else {
-                            Toast.makeText(requireContext(), "Error: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                requireContext(),
+                                "Error: ${task.exception?.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
             }

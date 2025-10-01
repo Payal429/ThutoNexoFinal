@@ -21,12 +21,15 @@ import java.util.*
 
 class ProfileFragment : Fragment() {
 
+    // ViewBinding
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
 
+    // Firebase
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
 
+    // Image picker state
     private var selectedImageUri: Uri? = null
     private var selectedImageBase64: String? = null
 
@@ -48,18 +51,23 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Firebase init
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
 
+        // Load existing data
         loadUserData()
 
+        // Click listeners
         binding.btnSelectImage.setOnClickListener { pickImage() }
         binding.btnUpdate.setOnClickListener { updateProfile() }
+
         binding.topAppBar.setNavigationOnClickListener {
             // If this fragment is hosted in an Activity with a back stack
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
-        /* 1.  MAKE THE TOOLBAR THE ACTION-BAR → title shows  */
+
+        // Make the toolbar the action bar → title shows
         val toolbar = view.findViewById<MaterialToolbar>(R.id.topAppBar)
         (requireActivity() as androidx.appcompat.app.AppCompatActivity).apply {
             setSupportActionBar(toolbar)
@@ -78,13 +86,14 @@ class ProfileFragment : Fragment() {
                 break
             }
         }
-        // 🔙 Back button action
+        // Back button action
         binding.topAppBar.setNavigationOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
             // Or use: findNavController().navigateUp()
         }
     }
 
+    // Image picker
     private fun pickImage() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
@@ -103,6 +112,7 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    // Bitmap / Base64 helpers
     private fun uriToBitmap(uri: Uri): Bitmap {
         val stream = requireContext().contentResolver.openInputStream(uri)
         return BitmapFactory.decodeStream(stream!!)
@@ -119,6 +129,7 @@ class ProfileFragment : Fragment() {
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
     }
 
+    // Load existing profile from Firestor
     private fun loadUserData() {
         val uid = auth.currentUser?.uid ?: return
 
@@ -130,11 +141,11 @@ class ProfileFragment : Fragment() {
                     binding.etSubject.setText(doc.getString("subjects") ?: "")
                     binding.etBio.setText(doc.getString("bio") ?: "")
 
+                    // Role radio buttons
                     when (doc.getString("role")) {
                         "Tutor" -> binding.rbTutor.isChecked = true
                         "Student" -> binding.rbStudent.isChecked = true
                     }
-
 
                     // Load profile image
                     val imageBase64 = doc.getString("profileImage")
@@ -149,13 +160,16 @@ class ProfileFragment : Fragment() {
                 }
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to load profile", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Failed to load profile", Toast.LENGTH_SHORT)
+                    .show()
             }
     }
 
+    // Update profile (Firestore)
     private fun updateProfile() {
         val uid = auth.currentUser?.uid ?: return
 
+        // Read UI fields
         val name = binding.etName.text.toString().trim()
         val phone = binding.etPhone.text.toString().trim()
         val role = when {
@@ -166,6 +180,7 @@ class ProfileFragment : Fragment() {
         val subjects = binding.etSubject.text.toString().trim()
         val bio = binding.etBio.text.toString().trim()
 
+        // Build update map
         val updates = mutableMapOf<String, Any>(
             "name" to name,
             "phone" to phone,
@@ -188,6 +203,7 @@ class ProfileFragment : Fragment() {
             }
     }
 
+    // Clean-up
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

@@ -5,6 +5,6 @@ data class User(
     val name: String = "",
     val email: String = "",
     val role: String = "",
-    val subjects: Any? = null,  // Accept String or List<String>
+    val subjects: Any? = null,
     val profilePic: String = ""
 )

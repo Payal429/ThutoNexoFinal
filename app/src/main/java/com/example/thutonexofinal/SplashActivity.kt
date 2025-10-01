@@ -27,10 +27,11 @@ class SplashActivity : AppCompatActivity() {
         val fadeSlideAnim: Animation = AnimationUtils.loadAnimation(this, R.anim.fade_slide_up)
 
         // Change status bar color
-        window.statusBarColor = getColor(R.color.light_purple) // your desired color
+        window.statusBarColor = getColor(R.color.light_purple)
 
-        // Optional: make status bar icons dark or light
-        window.decorView.systemUiVisibility = 0 // 0 = light icons, or use SYSTEM_UI_FLAG_LIGHT_STATUS_BAR for dark icons
+        // Make status bar icons dark or light
+        // 0 = light icons, or use SYSTEM_UI_FLAG_LIGHT_STATUS_BAR for dark icons
+        window.decorView.systemUiVisibility = 0
 
         // Animate sequentially
         binding.logo.startAnimation(fadeSlideAnim)
@@ -39,39 +40,52 @@ class SplashActivity : AppCompatActivity() {
             override fun onAnimationStart(animation: Animation?) {}
             override fun onAnimationEnd(animation: Animation?) {
                 binding.title.visibility = View.VISIBLE
-                val titleAnim = AnimationUtils.loadAnimation(this@SplashActivity, R.anim.fade_slide_up)
+                val titleAnim =
+                    AnimationUtils.loadAnimation(this@SplashActivity, R.anim.fade_slide_up)
                 binding.title.startAnimation(titleAnim)
 
                 titleAnim.setAnimationListener(object : Animation.AnimationListener {
                     override fun onAnimationStart(animation: Animation?) {}
                     override fun onAnimationEnd(animation: Animation?) {
                         binding.tagline.visibility = View.VISIBLE
-                        val taglineAnim = AnimationUtils.loadAnimation(this@SplashActivity, R.anim.fade_slide_up)
+                        val taglineAnim =
+                            AnimationUtils.loadAnimation(this@SplashActivity, R.anim.fade_slide_up)
                         binding.tagline.startAnimation(taglineAnim)
 
                         taglineAnim.setAnimationListener(object : Animation.AnimationListener {
                             override fun onAnimationStart(animation: Animation?) {}
                             override fun onAnimationEnd(animation: Animation?) {
                                 binding.tagline2.visibility = View.VISIBLE
-                                val tagline2Anim = AnimationUtils.loadAnimation(this@SplashActivity, R.anim.fade_slide_up)
+                                val tagline2Anim = AnimationUtils.loadAnimation(
+                                    this@SplashActivity,
+                                    R.anim.fade_slide_up
+                                )
                                 binding.tagline2.startAnimation(tagline2Anim)
 
-                                tagline2Anim.setAnimationListener(object : Animation.AnimationListener {
+                                tagline2Anim.setAnimationListener(object :
+                                    Animation.AnimationListener {
                                     override fun onAnimationStart(animation: Animation?) {}
                                     override fun onAnimationEnd(animation: Animation?) {
                                         binding.btnGetStarted.visibility = View.VISIBLE
-                                        val buttonAnim = AnimationUtils.loadAnimation(this@SplashActivity, R.anim.fade_slide_up)
+                                        val buttonAnim = AnimationUtils.loadAnimation(
+                                            this@SplashActivity,
+                                            R.anim.fade_slide_up
+                                        )
                                         binding.btnGetStarted.startAnimation(buttonAnim)
                                     }
+
                                     override fun onAnimationRepeat(animation: Animation?) {}
                                 })
                             }
+
                             override fun onAnimationRepeat(animation: Animation?) {}
                         })
                     }
+
                     override fun onAnimationRepeat(animation: Animation?) {}
                 })
             }
+
             override fun onAnimationRepeat(animation: Animation?) {}
         })
 
