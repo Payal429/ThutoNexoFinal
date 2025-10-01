@@ -11,6 +11,9 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.TextView
+import android.widget.Toast
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
@@ -51,6 +54,18 @@ class DiscoveryFragment : Fragment() {
             supportActionBar?.title = "Discover Chats"   // ← add this line
             supportActionBar?.setDisplayShowTitleEnabled(true)
         }
+        // Make toolbar title bold with custom font
+        for (i in 0 until toolbar.childCount) {
+            val child = toolbar.getChildAt(i)
+            if (child is TextView && child.text == toolbar.title) {
+                // Set bold style
+                child.setTypeface(child.typeface, android.graphics.Typeface.BOLD)
+                // Set custom font (backward-compatible)
+                val typeface = ResourcesCompat.getFont(requireContext(), R.font.anek_gujarati_bold)
+                child.typeface = typeface
+                break
+            }
+        }
 
         recyclerView = view.findViewById(R.id.userRecyclerView)
         searchBar = view.findViewById(R.id.searchBar)
@@ -65,6 +80,9 @@ class DiscoveryFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
 
+        // 🔹 Request contacts permission when fragment starts
+        PermissionHelper.requestContactsPermission(requireActivity())
+
         setupRoleSpinner()
         fetchUsers()
 
@@ -77,7 +95,31 @@ class DiscoveryFragment : Fragment() {
         btnDiscovery.setOnClickListener { filterUsers() }
 
     }
+    /* ---------------- Handle permission result ---------------- */
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
+        when (requestCode) {
+            PermissionHelper.REQUEST_CONTACTS -> {
+                PermissionHelper.handlePermissionResult(
+                    requireActivity(),
+                    requestCode,
+                    grantResults,
+                    onGranted = {
+                        // Permission granted, you can optionally do something
+                        Toast.makeText(requireContext(), "Contacts permission granted", Toast.LENGTH_SHORT).show()
+                    },
+                    onDenied = {
+                        Toast.makeText(requireContext(), "Contacts permission denied", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        }
+    }
     private fun setupRoleSpinner() {
         val roles = listOf("All", "Tutor", "Student")
         val roleAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, roles)

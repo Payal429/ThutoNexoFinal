@@ -8,7 +8,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
+import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import com.example.thutonexofinal.databinding.FragmentProfileBinding
 import com.google.android.material.appbar.MaterialToolbar
@@ -63,6 +65,18 @@ class ProfileFragment : Fragment() {
             setSupportActionBar(toolbar)
             supportActionBar?.title = "Update Your Profile"   // ← add this line
             supportActionBar?.setDisplayShowTitleEnabled(true)
+        }
+        // Make toolbar title bold with custom font
+        for (i in 0 until toolbar.childCount) {
+            val child = toolbar.getChildAt(i)
+            if (child is TextView && child.text == toolbar.title) {
+                // Set bold style
+                child.setTypeface(child.typeface, android.graphics.Typeface.BOLD)
+                // Set custom font (backward-compatible)
+                val typeface = ResourcesCompat.getFont(requireContext(), R.font.anek_gujarati_bold)
+                child.typeface = typeface
+                break
+            }
         }
         // 🔙 Back button action
         binding.topAppBar.setNavigationOnClickListener {

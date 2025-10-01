@@ -32,20 +32,33 @@ import java.io.ByteArrayOutputStream
 
 class ChatActivity : AppCompatActivity() {
 
+    // Messages list
     private lateinit var recyclerView: RecyclerView
+    // Adapter for messages + headers
     private lateinit var adapter: MessageAdapter
+    // Raw message objects from Firestore
     private val messageList = mutableListOf<Message>()
+    // Singleton Firestore instance
     private val db = FirebaseFirestore.getInstance()
+    // Logged-in user UID
     private val currentUserId = FirebaseAuth.getInstance().uid ?: ""
 
+    /* Chat meta-data passed via Intent extras */
+    // Firestore document id for this chat
     private lateinit var chatId: String
+    // Other participant (used for 1-to-1)
     private lateinit var receiverUid: String
+    // Display name in toolbar
     private lateinit var receiverName: String
+    // Toolbar avatar
     private lateinit var profileImage: ImageView
+    // Toolbar title
     private lateinit var usernameText: TextView
 
+    // Firestore real-time listener (removed in onDestroy to avoid leaks)
     private var messageListener: ListenerRegistration? = null
 
+    // Request code for image picker
     private val PICK_IMAGE_REQUEST = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,15 +71,15 @@ class ChatActivity : AppCompatActivity() {
         // Optional: make status bar icons dark or light
         window.decorView.systemUiVisibility = 0 // 0 = light icons, or use SYSTEM_UI_FLAG_LIGHT_STATUS_BAR for dark icons
 
-
-
+        // Extract Intent extras (finish if missing)
         chatId = intent.getStringExtra("chatId") ?: run { finish(); return }
         receiverUid = intent.getStringExtra("receiverId") ?: run { finish(); return }
         receiverName = intent.getStringExtra("receiverName") ?: run { finish(); return }
 
-        findViewById<ImageButton>(R.id.attachImageButton).setOnClickListener { pickImage() }
+        // Request storage permission for selecting images
+        PermissionHelper.requestStoragePermission(this)
 
-        // Toolbar setup
+        // Toolbar with custom layout (avatar + name)
         val toolbar = findViewById<Toolbar>(R.id.chatToolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
@@ -83,13 +96,15 @@ class ChatActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // back arrow
+        // Back arrow navigation
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
+        // Input handlers
+        findViewById<ImageButton>(R.id.attachImageButton).setOnClickListener { pickImage() }
         // Send button
         findViewById<ImageButton>(R.id.sendButton).setOnClickListener { sendMessage() }
 
-        // Load receiver profile
+        // Load receiver profile picture (real-time)
         db.collection("users").document(receiverUid)
             .addSnapshotListener { snapshot, _ ->
                 snapshot?.let {
@@ -108,11 +123,45 @@ class ChatActivity : AppCompatActivity() {
         loadMessages()
     }
 
+    // Permission handling (Android 13+ compatibility)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when (requestCode) {
+            PermissionHelper.REQUEST_STORAGE -> {
+                PermissionHelper.handlePermissionResult(
+                    this,
+                    requestCode,
+                    grantResults,
+                    onGranted = { /* Optional: do something if granted */ },
+                    onDenied = { /* Optional: handle denial */ }
+                )
+            }
+        }
+    }
+
+    // Image picker and compression
     private fun pickImage() {
+        // Check storage permission first
+        PermissionHelper.requestStoragePermission(this)
+
+        // After permission is granted, open gallery
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            // On Android 13+, use READ_MEDIA_IMAGES
+            PermissionHelper.requestImagePermission(this)
+        }
+
+        // Launch system gallery
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         startActivityForResult(intent, PICK_IMAGE_REQUEST)
     }
+
+    // Called when user selects an image
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK) {
@@ -121,11 +170,13 @@ class ChatActivity : AppCompatActivity() {
             }
         }
     }
+
+    // Compresses the chosen image, converts to Base64 and sends as a message
     private fun sendImageMessage(uri: Uri) {
         val inputStream = contentResolver.openInputStream(uri)
         val bitmap = BitmapFactory.decodeStream(inputStream)
 
-        // Compress and convert to Base64
+        // Compress to JPEG 40 % quality to stay within Firestore 1 MiB limit
         val outputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 40, outputStream)
         val compressedBytes = outputStream.toByteArray()
@@ -135,9 +186,10 @@ class ChatActivity : AppCompatActivity() {
             senderId = currentUserId,
             timestamp = System.currentTimeMillis(),
             imageBase64 = base64String,
-            type = "image"  // 🔹 Add this field
+            type = "image"
         )
 
+        // Add to sub-collection and update parent chat meta-data
         val chatRef = db.collection("chats").document(chatId)
         val messagesRef = chatRef.collection("messages")
 
@@ -151,7 +203,7 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-
+    // Text message sender
     private fun sendMessage() {
         val messageInput = findViewById<EditText>(R.id.messageInput)
         val text = messageInput.text.toString().trim()
@@ -164,6 +216,7 @@ class ChatActivity : AppCompatActivity() {
 
         // Add message to subcollection
         messagesRef.add(message).addOnSuccessListener {
+            // Update parent document (lastMessage & timestamp)
             val chatMap = hashMapOf(
                 "participants" to listOf(currentUserId, receiverUid),
                 "lastMessage" to text,
@@ -176,42 +229,11 @@ class ChatActivity : AppCompatActivity() {
                     Log.e("ChatActivity", "Failed to update chat: ${e.message}")
                 }
         }
-
+        // clear input field
         messageInput.setText("")
     }
 
-    /*    private fun loadMessages() {
-            messageListener = db.collection("chats")
-                .document(chatId)
-                .collection("messages")
-                .orderBy("timestamp", Query.Direction.ASCENDING)
-                .addSnapshotListener { snapshot, _ ->
-                    if (snapshot != null) {
-                        messageList.clear()
-                        for (doc in snapshot.documents) {
-                            doc.toObject(Message::class.java)?.let { messageList.add(it) }
-                        }
-
-                        // Convert messages into ChatItem list with date headers
-                        val items = mutableListOf<ChatItem>()
-                        var lastDate = ""
-                        for (msg in messageList) {
-                            val msgDate = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-                                .format(Date(msg.timestamp))
-                            if (msgDate != lastDate) {
-                                items.add(ChatItem.DateHeader(msgDate))
-                                lastDate = msgDate
-                            }
-                            items.add(ChatItem.MessageItem(msg))
-                        }
-
-                        // Pass ChatItem list to adapter
-                        adapter = MessageAdapter(items, currentUserId)
-                        recyclerView.adapter = adapter
-                        recyclerView.scrollToPosition(items.size - 1)
-                    }
-                }
-        }*/
+    // Helper: convert timestamp → “Today”, “Yesterday”, date
     private fun getFriendlyDate(timestamp: Long): String {
         val messageDate = Calendar.getInstance().apply { timeInMillis = timestamp }
         val today = Calendar.getInstance()
@@ -232,6 +254,7 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    // Firestore real-time listener with read-receipts
     private fun loadMessages() {
         messageListener = db.collection("chats")
             .document(chatId)
@@ -240,12 +263,12 @@ class ChatActivity : AppCompatActivity() {
             .addSnapshotListener { snapshot, _ ->
                 if (snapshot != null) {
 
-                    // 1. Find unread messages not sent by me
+                    // Find unread messages not sent by me
                     val unreadDocs = snapshot.documents.filter {
                         val msg = it.toObject(Message::class.java)
                         msg?.senderId != currentUserId && msg?.read == false
                     }
-                    // 2. Batch mark them as read
+                    // Batch mark them as read
                     if (unreadDocs.isNotEmpty()) {
                         val batch = db.batch()
                         unreadDocs.forEach { doc ->
@@ -259,12 +282,13 @@ class ChatActivity : AppCompatActivity() {
                         batch.commit()
                     }
 
-
+                    // Convert Firestore documents → Message objects
                     messageList.clear()
                     for (doc in snapshot.documents) {
                         doc.toObject(Message::class.java)?.let { messageList.add(it) }
                     }
 
+                    // Build UI list with date headers (Today / Yesterday / full date)
                     val items = mutableListOf<ChatItem>()
                     var lastDate = ""
                     for (msg in messageList) {
@@ -276,14 +300,14 @@ class ChatActivity : AppCompatActivity() {
                         items.add(ChatItem.MessageItem(msg))
                     }
 
+                    // Update RecyclerView
                     adapter.updateItems(items)
                     recyclerView.scrollToPosition(items.size - 1)
                 }
             }
     }
 
-
-
+    // Clean-up: remove Firestore listener
     override fun onDestroy() {
         super.onDestroy()
         messageListener?.remove()

@@ -69,10 +69,39 @@ class ChatListFragment : Fragment() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        // 🔹 Request Permissions
+        requestNecessaryPermissions()
+
         loadChats()
         loadOwnUserInfo()
     }
+    /* ---------------- Permissions ---------------- */
+    private fun requestNecessaryPermissions() {
 
+        // Request notifications for Android 13+
+        PermissionHelper.requestNotificationPermission(requireActivity())
+    }
+
+    // 🔹 Handle the permission result callback
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when (requestCode) {
+            PermissionHelper.REQUEST_NOTIFICATIONS -> {
+                PermissionHelper.handlePermissionResult(
+                    requireActivity(),
+                    requestCode,
+                    grantResults,
+                    onGranted = { /* Optionally do something if granted */ },
+                    onDenied = { /* Optionally handle denial */ }
+                )
+            }
+        }
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         userListeners.values.forEach { it.remove() }

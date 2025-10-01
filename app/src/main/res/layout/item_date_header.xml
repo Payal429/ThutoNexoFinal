@@ -5,6 +5,6 @@
     android:layout_height="wrap_content"
     android:gravity="center"
     android:padding="8dp"
-    android:fontFamily="@font/anek_gujarati"
+    android:fontFamily="@font/anek_gujarati_semibold"
     android:textColor="@color/dark_grey"
     android:textStyle="bold" />

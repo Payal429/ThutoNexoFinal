@@ -1,5 +1,6 @@
 package com.example.thutonexofinal
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,7 @@ import java.util.Locale
 class MessageAdapter(
     private var items: List<ChatItem>,
     private val currentUserId: String
+
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -92,6 +94,14 @@ class MessageAdapter(
                     .asBitmap()
                     .load(bytes)
                     .into(messageImage)
+
+                // Click listener to open full screen
+                messageImage.setOnClickListener {
+                    val intent = Intent(itemView.context, ImagePreviewActivity::class.java)
+                    intent.putExtra("imageBase64", imageBase64)
+                    itemView.context.startActivity(intent)
+                }
+
             } else {
                 messageImage.visibility = View.GONE
                 messageText.visibility = View.VISIBLE
@@ -118,6 +128,13 @@ class MessageAdapter(
                     .asBitmap()
                     .load(bytes)
                     .into(messageImage)
+
+                messageImage.setOnClickListener {
+                    val intent = Intent(itemView.context, ImagePreviewActivity::class.java)
+                    intent.putExtra("imageBase64", imageBase64)
+                    itemView.context.startActivity(intent)
+                }
+
             } else {
                 messageImage.visibility = View.GONE
                 messageText.visibility = View.VISIBLE

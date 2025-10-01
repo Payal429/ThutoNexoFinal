@@ -26,6 +26,12 @@ class SplashActivity : AppCompatActivity() {
         // Load the fade+slide animation
         val fadeSlideAnim: Animation = AnimationUtils.loadAnimation(this, R.anim.fade_slide_up)
 
+        // Change status bar color
+        window.statusBarColor = getColor(R.color.light_purple) // your desired color
+
+        // Optional: make status bar icons dark or light
+        window.decorView.systemUiVisibility = 0 // 0 = light icons, or use SYSTEM_UI_FLAG_LIGHT_STATUS_BAR for dark icons
+
         // Animate sequentially
         binding.logo.startAnimation(fadeSlideAnim)
 
