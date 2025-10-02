@@ -12,16 +12,14 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:src="@drawable/ic_profile"
-        android:scaleType="centerCrop"
-        />
+        android:scaleType="centerCrop" />
 
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        >
+        android:layout_weight="1">
 
         <TextView
             android:id="@+id/username"
@@ -43,8 +41,6 @@
             android:fontFamily="@font/anek_gujarati"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
-
-
     </LinearLayout>
 
     <LinearLayout
@@ -58,6 +54,7 @@
             android:text="12:30 PM"
             android:textSize="12sp"
             android:textColor="#999"
+            android:fontFamily="@font/anek_gujarati"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
@@ -66,6 +63,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:background="@drawable/unread_badge_bg"
+            android:fontFamily="@font/anek_gujarati"
             android:textColor="@color/white"
             android:textSize="12sp"
             android:padding="4dp"

@@ -67,7 +67,7 @@
 
                 <!-- Attachment button -->
                 <ImageButton
-                    android:id="@+id/attachButton"
+                    android:id="@+id/attachFileButton"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_gravity="end|center_vertical"

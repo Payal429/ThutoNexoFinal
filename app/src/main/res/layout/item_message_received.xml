@@ -21,14 +21,22 @@
         android:textColor="@color/black"
         android:layout_gravity="start" />
 
-    <ImageView
-        android:id="@+id/messageImage"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:background="@drawable/bg_bubble_border"
-        android:scaleType="centerCrop"
-        android:visibility="gone"
-        android:layout_marginTop="4dp"/>
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardElevation="0dp">
+
+        <ImageView
+            android:id="@+id/messageImage"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_bubble_border"/>
+    </androidx.cardview.widget.CardView>
 
 
     <TextView

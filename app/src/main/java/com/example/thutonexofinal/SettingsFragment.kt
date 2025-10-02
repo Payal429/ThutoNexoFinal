@@ -15,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
 import kotlin.jvm.java
@@ -42,24 +43,25 @@ class SettingsFragment : Fragment() {
         btnAboutApp = view.findViewById(R.id.btnAboutApp)
         btnLogout = view.findViewById(R.id.btnLogout)
 
-        // SharedPreferences for storing notification state
+        // SharedPreferences
         val prefs = requireContext().getSharedPreferences("app_settings", 0)
         switchNotifications.isChecked = prefs.getBoolean("notifications", true)
 
-        // Change password
-        btnChangePassword.setOnClickListener {
-            showChangePasswordDialog()
-        }
+        // Click listeners
+        btnChangePassword.setOnClickListener { showChangePasswordDialog() }
 
-        // Go to Profile Settings
         btnProfileSettings.setOnClickListener {
+            val profileFragment = ProfileFragment()
+            profileFragment.arguments = Bundle().apply {
+                putBoolean("fromSettings", true) // pass flag
+            }
+
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, ProfileFragment())
+                .replace(R.id.fragment_container, profileFragment)
                 .addToBackStack(null)
                 .commit()
         }
 
-        // About App
         btnAboutApp.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("About App")
@@ -68,7 +70,6 @@ class SettingsFragment : Fragment() {
                 .show()
         }
 
-        // Logout
         btnLogout.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("Logout")
@@ -84,7 +85,6 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    // Show dialog to change password
     private fun showChangePasswordDialog() {
         val editText = EditText(requireContext())
         editText.hint = "Enter new password"
@@ -95,62 +95,19 @@ class SettingsFragment : Fragment() {
             .setPositiveButton("Update") { _, _ ->
                 val newPassword = editText.text.toString()
                 if (newPassword.length < 6) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Password must be at least 6 characters",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(requireContext(), "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
                 FirebaseAuth.getInstance().currentUser?.updatePassword(newPassword)
                     ?.addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            Toast.makeText(
-                                requireContext(),
-                                "Password updated successfully",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(requireContext(), "Password updated successfully", Toast.LENGTH_SHORT).show()
                         } else {
-                            Toast.makeText(
-                                requireContext(),
-                                "Error: ${task.exception?.message}",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(requireContext(), "Error: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                         }
                     }
             }
             .setNegativeButton("Cancel", null)
             .show()
-
-
-
-        btnProfileSettings.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, ProfileFragment())
-                .addToBackStack(null)
-                .commit()
-        }
-
-        btnAboutApp.setOnClickListener {
-            AlertDialog.Builder(requireContext())
-                .setTitle("About App")
-                .setMessage("ThutonExo v1.0\n\nA learning platform for students and tutors.")
-                .setPositiveButton("OK", null)
-                .show()
-        }
-
-        btnLogout.setOnClickListener {
-            AlertDialog.Builder(requireContext())
-                .setTitle("Logout")
-                .setMessage("Are you sure you want to logout?")
-                .setPositiveButton("Yes") { _, _ ->
-                    FirebaseAuth.getInstance().signOut()
-                    val intent = Intent(requireContext(), LoginActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
-        }
     }
 }

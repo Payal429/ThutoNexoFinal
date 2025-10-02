@@ -42,10 +42,8 @@
         android:layout_height="wrap_content"
         android:hint="Email"
         app:boxBackgroundMode="outline"
-        app:boxCornerRadiusTopStart="10dp"
-        app:boxCornerRadiusTopEnd="10dp"
-        app:boxCornerRadiusBottomStart="10dp"
-        app:boxCornerRadiusBottomEnd="10dp"
+        app:cornerRadius="16dp"
+        app:boxBackgroundColor="@color/warm_white"
         app:layout_constraintTop_toBottomOf="@id/logo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -55,10 +53,10 @@
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cornerRadius="10dp"
+            app:cornerRadius="16dp"
             android:fontFamily="@font/anek_gujarati"
             android:textSize="16sp"
-            android:background="@color/warm_white"
+            app:boxBackgroundMode="filled"
             android:inputType="textEmailAddress"/>
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -73,16 +71,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginHorizontal="24dp"
+        app:boxBackgroundColor="@color/warm_white"
         android:layout_marginTop="12dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/warm_white"
-            app:cornerRadius="10dp"
+            app:cornerRadius="16dp"
+            app:boxBackgroundColor="@color/warm_white"
             android:fontFamily="@font/anek_gujarati"
             android:textSize="16sp"
+            app:boxBackgroundMode="filled"
             android:inputType="textPassword"/>
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -97,7 +97,7 @@
         android:backgroundTint="@color/green"
         android:textColor="@color/black"
         app:cornerRadius="10dp"
-        android:paddingVertical="14dp"
+        android:padding="16dp"
         app:layout_constraintTop_toBottomOf="@id/layoutPassword"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -112,18 +112,19 @@
         android:backgroundTint="@color/warm_white"
         android:elevation="4dp"
         android:fontFamily="@font/anek_gujarati_semibold"
-        android:icon="@drawable/ic_googleicon"
-        android:paddingVertical="12dp"
+        android:padding="16dp"
+        android:layout_marginTop="5dp"
         android:text="Sign in with Google"
         android:textColor="@color/black"
         android:textSize="16sp"
         app:cornerRadius="10dp"
-        app:iconGravity="start"
+        app:icon="@drawable/google"
+        app:iconGravity="textStart"
         app:iconTint="@null"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:iconPadding="8dp"
+        app:layout_constraintTop_toBottomOf="@id/btnLogin"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnLogin"/>
-
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 
     <!-- Sign Up Link -->
@@ -134,7 +135,7 @@
         android:text="Don’t have an account? Sign Up"
         android:textColor="@color/black"
         android:fontFamily="@font/anek_gujarati"
-        android:textSize="15sp"
+        android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@id/btnGoogleSignIn"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

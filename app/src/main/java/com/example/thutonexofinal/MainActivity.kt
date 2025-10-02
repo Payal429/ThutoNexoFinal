@@ -1,7 +1,9 @@
 package com.example.thutonexofinal
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -56,10 +58,46 @@ class MainActivity : AppCompatActivity() {
     }
 
     //  Helper: replace fragment in container
-    private fun loadFragment(fragment: Fragment): Boolean {
+    fun loadFragment(fragment: Fragment, selectTabId: Int? = null): Boolean {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
+
+        selectTabId?.let { id ->
+            val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+            bottomNav.selectedItemId = id
+        }
+
         return true
     }
+    override fun onBackPressed() {
+        val fragmentCount = supportFragmentManager.backStackEntryCount
+
+        if (fragmentCount == 0) {
+            // No fragments left in back stack → app will exit
+            showLogoutDialog()
+        } else {
+            // Navigate back normally
+            super.onBackPressed()
+        }
+    }
+
+    private fun showLogoutDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Logout")
+            .setMessage("Are you sure you want to log out?")
+            .setPositiveButton("Yes") { _, _ ->
+                // Clear session, go to login screen
+                val intent = Intent(this, LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                finish()
+            }
+            .setNegativeButton("No") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+
 }

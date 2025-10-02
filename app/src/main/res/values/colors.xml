@@ -6,6 +6,7 @@
     <color name="warm_white">#F7F7F7</color>
     <color name="light_green">#B7DE75</color>
     <color name="green">#92C33E</color>
-    <color name="pastel_purple">#CAB4DB</color>
+    <color name="pastel_purple">#CFA2F6</color>
     <color name="dark_grey">#2C2C2C</color>
+    <color name="red">#CE0A0A</color>
 </resources>

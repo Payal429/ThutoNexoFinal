@@ -20,5 +20,6 @@
         android:text="Username"
         android:fontFamily="@font/anek_gujarati_semibold"
         android:textSize="18sp"
+        android:textColor="@color/black"
         android:textStyle="bold"/>
 </LinearLayout>

@@ -78,7 +78,7 @@
         android:layout_height="wrap_content"
         android:backgroundTint="@color/green"
         android:textColor="@color/black"
-        android:fontFamily="sans-serif-medium"
+        android:fontFamily="@font/anek_gujarati_semibold"
         android:elevation="8dp"
         android:paddingVertical="14dp"
         app:cornerRadius="12dp"

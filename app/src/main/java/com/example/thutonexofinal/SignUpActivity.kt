@@ -4,10 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.thutonexofinal.databinding.ActivitySignupBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -26,27 +23,55 @@ class SignUpActivity : AppCompatActivity() {
         binding = ActivitySignupBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Firebase init
+        // Initialize Firebase
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
 
         // Sign Up button click
         binding.btnSignUp.setOnClickListener {
             val name = binding.etName.text.toString().trim()
-            val email = binding.etSignUpEmail.text.toString().trim()
-            val password = binding.etSignUpPassword.text.toString().trim()
+            val email = binding.etEmail.text.toString().trim()
+            val password = binding.etPassword.text.toString().trim()
 
-            // Basic client-side validation
-            if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            // Reset all borders first
+            binding.layoutName.parent?.let { (it as? com.google.android.material.textfield.TextInputLayout)?.setBoxStrokeColor(getColor(R.color.black)) }
+            binding.layoutEmail.parent?.let { (it as? com.google.android.material.textfield.TextInputLayout)?.setBoxStrokeColor(getColor(R.color.black)) }
+            binding.layoutPassword.parent?.let { (it as? com.google.android.material.textfield.TextInputLayout)?.setBoxStrokeColor(getColor(R.color.black)) }
+
+            var isValid = true
+
+            // Check empty fields and set red border
+            if (name.isEmpty()) {
+                (binding.layoutName.parent as? com.google.android.material.textfield.TextInputLayout)
+                    ?.setBoxStrokeColor(getColor(R.color.red))
+                isValid = false
+            }
+
+            if (email.isEmpty()) {
+                (binding.layoutEmail.parent as? com.google.android.material.textfield.TextInputLayout)
+                    ?.setBoxStrokeColor(getColor(R.color.red))
+                isValid = false
+            }
+
+            if (password.isEmpty()) {
+                (binding.layoutPassword.parent as? com.google.android.material.textfield.TextInputLayout)
+                    ?.setBoxStrokeColor(getColor(R.color.red))
+                isValid = false
+            }
+
+            // Stop if validation fails
+            if (!isValid) {
                 Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
+            // Check for valid email format
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 Toast.makeText(this, "Please enter a valid email", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
+            // Check password length
             if (password.length < 6) {
                 Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT)
                     .show()
@@ -66,12 +91,10 @@ class SignUpActivity : AppCompatActivity() {
 
     // Queries Firebase Auth to see if the email is already registered.
     private fun checkUserExistsAndSignUp(name: String, email: String, password: String) {
-        // Check if email is already registered
         auth.fetchSignInMethodsForEmail(email).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val signInMethods = task.result?.signInMethods
                 if (signInMethods.isNullOrEmpty()) {
-                    // User doesn't exist, create account
                     createUser(name, email, password)
                 } else {
                     Toast.makeText(this, "User already exists. Please login.", Toast.LENGTH_SHORT)
@@ -128,5 +151,4 @@ class SignUpActivity : AppCompatActivity() {
             }
         }
     }
-
 }

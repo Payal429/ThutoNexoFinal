@@ -20,7 +20,7 @@ class ImagePreviewActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Change status bar color
-        window.statusBarColor = getColor(R.color.light_purple)
+        window.statusBarColor = getColor(R.color.green)
 
         // Make status bar icons dark or light
         // 0 = light icons, or use SYSTEM_UI_FLAG_LIGHT_STATUS_BAR for dark icons

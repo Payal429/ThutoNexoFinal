@@ -2,6 +2,8 @@ package com.example.thutonexofinal
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
@@ -17,6 +19,21 @@ object PermissionHelper {
     const val REQUEST_CONTACTS = 203
     const val REQUEST_STORAGE = 204
     const val REQUEST_NOTIFICATIONS = 205
+    const val REQUEST_CAMERA = 206
+
+    // SharedPreferences for one-time toast
+    private const val PREFS_NAME = "permission_toast_prefs"
+    private const val KEY_TOAST_SHOWN = "toast_shown"
+
+    private fun showToastOnce(activity: Activity, message: String) {
+        val prefs: SharedPreferences =
+            activity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val shown = prefs.getBoolean(KEY_TOAST_SHOWN, false)
+        if (!shown) {
+            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+            prefs.edit().putBoolean(KEY_TOAST_SHOWN, true).apply()
+        }
+    }
 
     // Media Permissions
     fun requestImagePermission(activity: Activity) {
@@ -29,7 +46,7 @@ object PermissionHelper {
                 REQUEST_MEDIA_IMAGES
             )
         } else {
-            Toast.makeText(activity, "Image permission already granted", Toast.LENGTH_SHORT).show()
+            showToastOnce(activity, "Image permission already granted")
         }
     }
 
@@ -43,7 +60,7 @@ object PermissionHelper {
                 REQUEST_MEDIA_VIDEO
             )
         } else {
-            Toast.makeText(activity, "Video permission already granted", Toast.LENGTH_SHORT).show()
+            showToastOnce(activity, "Video permission already granted")
         }
     }
 
@@ -57,7 +74,22 @@ object PermissionHelper {
                 REQUEST_MEDIA_AUDIO
             )
         } else {
-            Toast.makeText(activity, "Audio permission already granted", Toast.LENGTH_SHORT).show()
+            showToastOnce(activity, "Audio permission already granted")
+        }
+    }
+
+    // Camera Permission
+    fun requestCameraPermission(activity: Activity) {
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                activity,
+                arrayOf(Manifest.permission.CAMERA),
+                REQUEST_CAMERA
+            )
+        } else {
+            showToastOnce(activity, "Camera permission already granted")
         }
     }
 
@@ -72,8 +104,7 @@ object PermissionHelper {
                 REQUEST_CONTACTS
             )
         } else {
-            Toast.makeText(activity, "Contacts permission already granted", Toast.LENGTH_SHORT)
-                .show()
+            showToastOnce(activity, "Contacts permission already granted")
         }
     }
 
@@ -95,8 +126,7 @@ object PermissionHelper {
                 REQUEST_STORAGE
             )
         } else {
-            Toast.makeText(activity, "Storage permissions already granted", Toast.LENGTH_SHORT)
-                .show()
+            showToastOnce(activity, "Storage permissions already granted")
         }
     }
 
@@ -112,11 +142,7 @@ object PermissionHelper {
                     REQUEST_NOTIFICATIONS
                 )
             } else {
-                Toast.makeText(
-                    activity,
-                    "Notification permission already granted",
-                    Toast.LENGTH_SHORT
-                ).show()
+                showToastOnce(activity, "Notification permission already granted")
             }
         }
     }

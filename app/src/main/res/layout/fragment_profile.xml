@@ -64,9 +64,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:fontFamily="@font/anek_gujarati"
+                    android:fontFamily="@font/anek_gujarati_semibold"
                     android:backgroundTint="@color/green"
                     android:paddingVertical="14dp"
+                    android:textSize="16sp"
                     android:text="Change Picture"
                     android:textColor="@color/black"
                     app:cornerRadius="10dp" />
@@ -79,14 +80,16 @@
                 android:layout_marginBottom="16dp"
                 android:hint="Full Name"
                 android:fontFamily="@font/anek_gujarati"
-                app:boxBackgroundMode="outline">
+                app:boxBackgroundMode="outline"
+                app:cornerRadius="16dp"
+                app:boxBackgroundColor="@color/warm_white">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etName"
                     android:fontFamily="@font/anek_gujarati"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/warm_white" />
+                    app:boxBackgroundMode="filled" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Phone -->
@@ -96,14 +99,16 @@
                 android:layout_marginBottom="16dp"
                 android:hint="Phone"
                 android:fontFamily="@font/anek_gujarati"
-                app:boxBackgroundMode="outline">
+                app:boxBackgroundMode="outline"
+                app:cornerRadius="16dp"
+                app:boxBackgroundColor="@color/warm_white">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPhone"
                     android:fontFamily="@font/anek_gujarati"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/warm_white"
+                    app:boxBackgroundMode="filled"
                     android:inputType="phone" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -141,6 +146,8 @@
                 android:layout_marginBottom="16dp"
                 android:fontFamily="@font/anek_gujarati"
                 android:hint="Subjects"
+                app:cornerRadius="16dp"
+                app:boxBackgroundColor="@color/warm_white"
                 app:boxBackgroundMode="outline">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -148,7 +155,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/anek_gujarati"
-                    android:background="@color/warm_white" />
+                    app:boxBackgroundMode="filled" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Bio -->
@@ -158,16 +165,19 @@
                 android:layout_marginBottom="24dp"
                 android:fontFamily="@font/anek_gujarati"
                 android:hint="Short Bio"
+                app:cornerRadius="16dp"
+                app:boxBackgroundColor="@color/warm_white"
                 app:boxBackgroundMode="outline">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etBio"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/warm_white"
                     android:fontFamily="@font/anek_gujarati"
                     android:inputType="textMultiLine"
-                    android:minLines="3" />
+                    app:boxBackgroundMode="filled"
+                    app:cornerRadius="16dp"
+                    android:minLines="2" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
@@ -177,7 +187,8 @@
                 android:backgroundTint="@color/green"
                 android:paddingVertical="14dp"
                 android:text="Update Profile"
-                android:fontFamily="@font/anek_gujarati"
+                android:textSize="16sp"
+                android:fontFamily="@font/anek_gujarati_semibold"
                 android:textColor="@color/black"
                 app:cornerRadius="10dp" />
         </LinearLayout>

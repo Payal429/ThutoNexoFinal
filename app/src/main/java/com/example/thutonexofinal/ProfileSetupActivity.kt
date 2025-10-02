@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
@@ -20,7 +21,7 @@ import java.util.*
 
 class ProfileSetupActivity : AppCompatActivity() {
 
-    // View-binding
+    // View binding
     private lateinit var binding: ActivityProfileSetupBinding
 
     // Firebase
@@ -30,16 +31,14 @@ class ProfileSetupActivity : AppCompatActivity() {
 
     // Image state
     private var selectedImageUri: Uri? = null
-
-    // // Fallback if Storage fails
     private var selectedImageBase64: String? = null
 
     companion object {
         private const val TAG = "ProfileSetupActivity"
         private const val PICK_IMAGE_REQUEST = 1001
+        private const val REQUEST_IMAGE_PERMISSION = 2001
     }
 
-    // Activity life-cycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileSetupBinding.inflate(layoutInflater)
@@ -50,20 +49,47 @@ class ProfileSetupActivity : AppCompatActivity() {
         firestore = FirebaseFirestore.getInstance()
         storage = FirebaseStorage.getInstance()
 
-        // Toolbar: back arrow finishes
+        // Toolbar back button
         val toolbar = findViewById<MaterialToolbar>(R.id.topAppBar)
-        toolbar.setNavigationOnClickListener {
-            onBackPressed() // or finish()
-        }
+        toolbar.setNavigationOnClickListener { onBackPressed() }
 
-        // Select image
+        // Select image button
         binding.btnSelectImage.setOnClickListener {
-            // Request image/media permission before opening picker
-            PermissionHelper.requestImagePermission(this)
+            checkAndPickImage()
         }
 
+        // Save profile button
         binding.btnSave.setOnClickListener {
             saveProfile()
+        }
+    }
+
+    // Check permissions & open gallery
+    private fun checkAndPickImage() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+
+            if (checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES) ==
+                android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                openImagePicker()
+            } else {
+                requestPermissions(
+                    arrayOf(android.Manifest.permission.READ_MEDIA_IMAGES),
+                    REQUEST_IMAGE_PERMISSION
+                )
+            }
+        } else {
+            // Older devices
+            if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                openImagePicker()
+            } else {
+                requestPermissions(
+                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                    REQUEST_IMAGE_PERMISSION
+                )
+            }
         }
     }
 
@@ -74,62 +100,47 @@ class ProfileSetupActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        when (requestCode) {
-            PermissionHelper.REQUEST_MEDIA_IMAGES -> {
-                PermissionHelper.handlePermissionResult(
-                    this,
-                    requestCode,
-                    grantResults,
-                    onGranted = {
-                        // Permission granted, open image picker
-                        openImagePicker()
-                    },
-                    onDenied = {
-                        Toast.makeText(
-                            this,
-                            "Image permission is required to select a profile picture",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                )
+        if (requestCode == REQUEST_IMAGE_PERMISSION) {
+            if (grantResults.isNotEmpty() &&
+                grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                openImagePicker()
+            } else {
+                Toast.makeText(this, "Permission required to select image", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
 
-    // Image picker
+    // Open gallery
     private fun openImagePicker() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         startActivityForResult(intent, PICK_IMAGE_REQUEST)
     }
 
+    // Handle image selection
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
             data?.data?.let { uri ->
                 selectedImageUri = uri
-                val bitmap = uriToBitmap(uri)
+                val bitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(uri))
                 binding.ivProfile.setImageBitmap(bitmap)
                 selectedImageBase64 = bitmapToBase64(bitmap) // fallback if storage fails
             }
         }
     }
 
-    // Bitmap / Base64 helpers
-    private fun uriToBitmap(uri: Uri): Bitmap {
-        val inputStream = contentResolver.openInputStream(uri)
-        return BitmapFactory.decodeStream(inputStream!!)
-    }
-
+    // Convert bitmap to Base64
     private fun bitmapToBase64(bitmap: Bitmap): String {
         val baos = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos)
         return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT)
     }
 
-    // Validation and save
+    // Save profile
     private fun saveProfile() {
         val name = binding.etName.text.toString().trim()
         val phone = binding.etPhone.text.toString().trim()
@@ -158,8 +169,8 @@ class ProfileSetupActivity : AppCompatActivity() {
         }
 
         uid?.let { userId ->
-            // If user selected an image, try Firebase Storage first
             if (selectedImageUri != null) {
+                // Upload image to Firebase Storage
                 val imageRef =
                     storage.reference.child("profile_images/$userId/${UUID.randomUUID()}")
                 imageRef.putFile(selectedImageUri!!)
@@ -175,7 +186,6 @@ class ProfileSetupActivity : AppCompatActivity() {
                                 downloadUrl.toString()
                             )
                         }.addOnFailureListener {
-                            // Storage failed, fallback to Base64
                             saveUserData(
                                 userId,
                                 name,
@@ -188,11 +198,9 @@ class ProfileSetupActivity : AppCompatActivity() {
                         }
                     }
                     .addOnFailureListener {
-                        // Storage failed, fallback to Base64
                         saveUserData(userId, name, phone, role, subjects, bio, selectedImageBase64)
                     }
             } else {
-                // No image selected, just use Base64 (will be null)
                 saveUserData(userId, name, phone, role, subjects, bio, selectedImageBase64)
             }
         } ?: run {
@@ -200,7 +208,7 @@ class ProfileSetupActivity : AppCompatActivity() {
         }
     }
 
-    // Firestore write
+    // Write user data to Firestore
     private fun saveUserData(
         userId: String,
         name: String,
@@ -235,7 +243,6 @@ class ProfileSetupActivity : AppCompatActivity() {
             }
     }
 
-    // Navigation
     private fun navigateToMain() {
         val intent = Intent(this@ProfileSetupActivity, MainActivity::class.java)
         intent.putExtra("openChatList", true)

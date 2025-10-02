@@ -40,6 +40,7 @@
                 android:layout_height="wrap_content"
                 android:text="Help us know you better. Fill in the details below."
                 android:textSize="16sp"
+                android:fontFamily="@font/anek_gujarati_semibold"
                 android:textColor="@color/black"
                 android:layout_gravity="center_horizontal"
                 android:paddingBottom="24dp"/>
@@ -86,20 +87,18 @@
                 android:fontFamily="@font/anek_gujarati"
                 android:textSize="16sp"
                 app:boxBackgroundMode="outline"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusBottomEnd="12dp"
+                app:cornerRadius="16dp"
+                app:boxBackgroundColor="@color/warm_white"
                 android:layout_marginBottom="16dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cornerRadius="10dp"
                     android:fontFamily="@font/anek_gujarati"
                     android:textSize="16sp"
-                    android:background="@color/warm_white"
+                    app:cornerRadius="16dp"
+                    app:boxBackgroundMode="filled"
                     android:inputType="textPersonName"/>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -111,20 +110,18 @@
                 android:fontFamily="@font/anek_gujarati"
                 android:textSize="16sp"
                 app:boxBackgroundMode="outline"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusBottomEnd="12dp"
+                app:cornerRadius="16dp"
+                app:boxBackgroundColor="@color/warm_white"
                 android:layout_marginBottom="16dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPhone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cornerRadius="10dp"
                     android:fontFamily="@font/anek_gujarati"
                     android:textSize="16sp"
-                    android:background="@color/warm_white"
+                    app:cornerRadius="16dp"
+                    app:boxBackgroundMode="filled"
                     android:inputType="phone"/>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -167,20 +164,18 @@
                 app:boxBackgroundMode="outline"
                 android:fontFamily="@font/anek_gujarati"
                 android:textSize="16sp"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusBottomEnd="12dp"
+                app:cornerRadius="16dp"
+                app:boxBackgroundColor="@color/warm_white"
                 android:layout_marginBottom="16dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etSubject"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cornerRadius="10dp"
                     android:fontFamily="@font/anek_gujarati"
                     android:textSize="16sp"
-                    android:background="@color/warm_white"
+                    app:cornerRadius="16dp"
+                    app:boxBackgroundMode="filled"
                     android:inputType="text"/>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -192,10 +187,8 @@
                 android:fontFamily="@font/anek_gujarati"
                 android:textSize="16sp"
                 app:boxBackgroundMode="outline"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusBottomEnd="12dp"
+                app:cornerRadius="16dp"
+                app:boxBackgroundColor="@color/warm_white"
                 android:layout_marginBottom="24dp">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -203,11 +196,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textMultiLine"
-                    app:cornerRadius="10dp"
                     android:fontFamily="@font/anek_gujarati"
                     android:textSize="16sp"
-                    android:background="@color/warm_white"
-                    android:minLines="3"/>
+                    app:cornerRadius="16dp"
+                    app:boxBackgroundMode="filled"
+                    android:minLines="2"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Save Profile Button -->
@@ -228,9 +221,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginBottom="24dp"
                 android:elevation="6dp"/>
-
         </LinearLayout>
     </ScrollView>
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

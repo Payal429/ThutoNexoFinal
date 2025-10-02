@@ -23,7 +23,8 @@
         android:background="@color/light_purple"
         app:itemIconSize="28dp"
         app:itemTextColor="@color/dark_grey"
-        app:itemIconTint="@color/black"
+        app:itemIconTint="@color/bottom_nav_icon_selector"
         app:labelVisibilityMode="unlabeled"
+        app:itemBackground="@null"
         app:menu="@menu/bottom_nav_menu" />
 </LinearLayout>
