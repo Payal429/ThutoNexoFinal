@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -75,6 +76,30 @@ class ChatListFragment : Fragment() {
 
         loadChats()
         loadOwnUserInfo()
+        // 👇 Add popup click listener here
+        userAvatar.setOnClickListener {
+            val inflater = LayoutInflater.from(requireContext())
+            val popupView = inflater.inflate(R.layout.popup_user_info, null)
+
+            val popupAvatar = popupView.findViewById<ImageView>(R.id.popupAvatar)
+            val popupUserName = popupView.findViewById<TextView>(R.id.popupUserName)
+            val popupUserStatus = popupView.findViewById<TextView>(R.id.popupUserStatus)
+
+            // Copy values from your profile header
+            popupAvatar.setImageDrawable(userAvatar.drawable)
+            popupUserName.text = userName.text
+            popupUserStatus.text = userStatus.text
+
+            val popupWindow = PopupWindow(
+                popupView,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                true
+            )
+
+            popupWindow.elevation = 10f
+            popupWindow.showAsDropDown(userAvatar, 0, 20)
+        }
     }
 
     // Permissions handling

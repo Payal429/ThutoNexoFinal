@@ -59,13 +59,13 @@
                     android:textSize="14sp" />
             </LinearLayout>
             <!-- Resource Icon (right corner) -->
-            <ImageButton
+<!--            <ImageButton
                 android:id="@+id/btnResources"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_attach"
-                android:contentDescription="Resources" />
+                android:contentDescription="Resources" />-->
         </LinearLayout>
     </com.google.android.material.appbar.MaterialToolbar>
 
