@@ -107,6 +107,26 @@ object PermissionHelper {
             showToastOnce(activity, "Contacts permission already granted")
         }
     }
+    // Check if storage permission is already granted (for pre-Android 13)
+    fun hasStoragePermission(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ uses READ_MEDIA_IMAGES instead
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.READ_MEDIA_IMAGES
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            // Older versions: check read/write external storage
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ) == PackageManager.PERMISSION_GRANTED
+        }
+    }
 
     // Storage (Older Devices)
     fun requestStoragePermission(activity: Activity) {

@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -76,30 +75,10 @@ class ChatListFragment : Fragment() {
 
         loadChats()
         loadOwnUserInfo()
-        // 👇 Add popup click listener here
         userAvatar.setOnClickListener {
-            val inflater = LayoutInflater.from(requireContext())
-            val popupView = inflater.inflate(R.layout.popup_user_info, null)
-
-            val popupAvatar = popupView.findViewById<ImageView>(R.id.popupAvatar)
-            val popupUserName = popupView.findViewById<TextView>(R.id.popupUserName)
-            val popupUserStatus = popupView.findViewById<TextView>(R.id.popupUserStatus)
-
-            // Copy values from your profile header
-            popupAvatar.setImageDrawable(userAvatar.drawable)
-            popupUserName.text = userName.text
-            popupUserStatus.text = userStatus.text
-
-            val popupWindow = PopupWindow(
-                popupView,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                true
-            )
-
-            popupWindow.elevation = 10f
-            popupWindow.showAsDropDown(userAvatar, 0, 20)
+            showProfilePopup()
         }
+
     }
 
     // Permissions handling
@@ -174,72 +153,60 @@ class ChatListFragment : Fragment() {
         chatList.clear()
         adapter.notifyDataSetChanged()
 
-        // Query: only chats where current user is a participant, newest first
+        // Query: chats where current user is a participant, newest first
         db.collection("chats")
             .whereArrayContains("participants", currentUserId)
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    error.printStackTrace(); return@addSnapshotListener
-                }
+                if (error != null) { error.printStackTrace(); return@addSnapshotListener }
                 if (snapshot == null) return@addSnapshotListener
 
-                // For every chat document...
                 for (doc in snapshot.documents) {
                     val chatId = doc.id
                     val participants = doc.get("participants") as? List<String> ?: continue
                     val otherUserId = participants.firstOrNull { it != currentUserId } ?: continue
 
-                    // Firestore reference to the other participant
-                    val userRef = db.collection("users").document(otherUserId)
-
                     // Remove previous listener for this user (if any)
                     userListeners[otherUserId]?.remove()
 
-                    // Attach a real-time listener to the other user document
+                    // Attach listener to the other user's document
+                    val userRef = db.collection("users").document(otherUserId)
                     val listener = userRef.addSnapshotListener { userDoc, _ ->
                         if (userDoc != null && userDoc.exists()) {
                             val name = userDoc.getString("name") ?: "Unknown"
                             val profileImageBase64 = userDoc.getString("profileImage") ?: ""
 
-                            // Fetch the last message in this chat
-                            db.collection("chats").document(chatId)
+                            // Listener for unread messages in this chat (real-time)
+                            db.collection("chats")
+                                .document(chatId)
                                 .collection("messages")
-                                .orderBy("timestamp", Query.Direction.DESCENDING)
-                                .limit(1)
-                                .get()
-                                .addOnSuccessListener { messageSnapshot ->
+                                .whereEqualTo("read", false)
+                                .addSnapshotListener { unreadSnapshot, _ ->
+                                    val totalUnread = unreadSnapshot?.documents
+                                        ?.count { it.getString("senderId") != currentUserId } ?: 0
 
-                                    // Get last message type
-                                    val lastMessageDoc = messageSnapshot.documents.firstOrNull()
-                                    val lastMessageText = lastMessageDoc?.getString("text") ?: ""
-                                    val lastMessageType =
-                                        lastMessageDoc?.getString("type") ?: "text"
-                                    val timestampText =
-                                        (lastMessageDoc?.get("timestamp") as? Long)?.let {
-                                            SimpleDateFormat("hh:mm a", Locale.getDefault()).format(
-                                                Date(it)
-                                            )
-                                        } ?: ""
-
-                                    // Count unread messages sent by the other user
+                                    // Get last message in this chat (real-time)
                                     db.collection("chats")
                                         .document(chatId)
                                         .collection("messages")
-                                        .whereEqualTo("read", false)
+                                        .orderBy("timestamp", Query.Direction.DESCENDING)
+                                        .limit(1)
                                         .get()
-                                        .addOnSuccessListener { snap ->
-                                            val totalUnread =
-                                                snap.documents.count { it.getString("senderId") != currentUserId }
+                                        .addOnSuccessListener { messageSnapshot ->
+                                            val lastMessageDoc = messageSnapshot.documents.firstOrNull()
+                                            val lastMessageText = lastMessageDoc?.getString("text") ?: ""
+                                            val lastMessageType = lastMessageDoc?.getString("type") ?: "text"
+                                            val timestampText = (lastMessageDoc?.get("timestamp") as? Long)?.let {
+                                                SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(it))
+                                            } ?: ""
 
-                                            val index =
-                                                chatList.indexOfFirst { it.userId == otherUserId }
+                                            val index = chatList.indexOfFirst { it.userId == otherUserId }
                                             if (index != -1) {
                                                 chatList[index] = chatList[index].copy(
                                                     username = name,
                                                     profileImageBase64 = profileImageBase64,
                                                     lastMessage = lastMessageText,
-                                                    lastMessageType = lastMessageType, // 🔹 update type
+                                                    lastMessageType = lastMessageType,
                                                     timestamp = timestampText,
                                                     unreadCount = totalUnread
                                                 )
@@ -252,7 +219,7 @@ class ChatListFragment : Fragment() {
                                                         username = name,
                                                         profileImageBase64 = profileImageBase64,
                                                         lastMessage = lastMessageText,
-                                                        lastMessageType = lastMessageType, // 🔹 save type
+                                                        lastMessageType = lastMessageType,
                                                         timestamp = timestampText,
                                                         unreadCount = totalUnread
                                                     )
@@ -264,9 +231,30 @@ class ChatListFragment : Fragment() {
                         }
                     }
 
-                    // Keep reference so we can remove it later
+                    // Keep reference to remove later
                     userListeners[otherUserId] = listener
                 }
             }
     }
+    private fun showProfilePopup() {
+        val inflater = LayoutInflater.from(requireContext())
+        val view = inflater.inflate(R.layout.popup_user_info, null)
+
+        val popupAvatar = view.findViewById<ImageView>(R.id.popupAvatar)
+        val popupName = view.findViewById<TextView>(R.id.popupUserName)
+        val popupStatus = view.findViewById<TextView>(R.id.popupUserStatus)
+
+        // Set values from current user info
+        popupName.text = userName.text
+        popupStatus.text = userStatus.text
+        popupAvatar.setImageDrawable(userAvatar.drawable)
+
+        val dialog = android.app.Dialog(requireContext())
+        dialog.setContentView(view)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        // Allow dismissing when touching outside
+        dialog.setCanceledOnTouchOutside(true)
+        dialog.show()
+    }
+
 }

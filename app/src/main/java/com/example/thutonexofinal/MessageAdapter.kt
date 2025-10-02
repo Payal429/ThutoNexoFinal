@@ -84,48 +84,38 @@ class MessageAdapter(
         fun bind(msg: Message, time: String) {
             messageTime.text = time
 
-            when {
-                !msg.imageBase64.isNullOrEmpty() -> {
-                    // Image message
-                    messageText.visibility = View.GONE
-                    messageImage.visibility = View.VISIBLE
-                    val bytes = Base64.decode(msg.imageBase64, Base64.DEFAULT)
-                    Glide.with(itemView.context)
-                        .asBitmap()
-                        .load(bytes)
-                        .into(messageImage)
+            // Image Message
+            if (!msg.imageBase64.isNullOrEmpty()) {
+                messageText.visibility = View.GONE
+                messageImage.visibility = View.VISIBLE
+                val bytes = Base64.decode(msg.imageBase64, Base64.DEFAULT)
+                Glide.with(itemView.context)
+                    .asBitmap()
+                    .load(bytes)
+                    .into(messageImage)
 
-                    messageImage.setOnClickListener {
-                        val intent = Intent(itemView.context, ImagePreviewActivity::class.java)
-                        intent.putExtra("imageBase64", msg.imageBase64)
-                        itemView.context.startActivity(intent)
-                    }
+                messageImage.setOnClickListener {
+                    val intent = Intent(itemView.context, ImagePreviewActivity::class.java)
+                    intent.putExtra("imageBase64", msg.imageBase64)
+                    itemView.context.startActivity(intent)
                 }
 
-                !msg.fileBase64.isNullOrEmpty() && !msg.fileName.isNullOrEmpty() -> {
-                    // File message
-                    messageImage.visibility = View.VISIBLE
-                    messageText.visibility = View.VISIBLE
-
-                    // Set a generic file icon for files
-                    messageImage.setImageResource(R.drawable.ic_file) // <-- Add a file icon in drawable
-                    messageText.text = msg.fileName
-
-                    messageImage.setOnClickListener {
-                        FileHelper.openFile(itemView.context, msg.fileBase64, msg.fileName)
-                    }
-
-                    messageText.setOnClickListener {
-                        FileHelper.openFile(itemView.context, msg.fileBase64, msg.fileName)
-                    }
+            }
+            // File Message
+            else if (!msg.fileBase64.isNullOrEmpty()) {
+                messageImage.visibility = View.GONE
+                messageText.visibility = View.VISIBLE
+                messageText.text = "📎 ${msg.fileName}"
+                messageText.setOnClickListener {
+                    // FIXED: assert non-null because we already checked
+                    FileHelper.openFile(itemView.context, msg.fileBase64!!, msg.fileName!!)
                 }
-
-                else -> {
-                    // Text message
-                    messageImage.visibility = View.GONE
-                    messageText.visibility = View.VISIBLE
-                    messageText.text = msg.text
-                }
+            }
+            // Text Message
+            else {
+                messageImage.visibility = View.GONE
+                messageText.visibility = View.VISIBLE
+                messageText.text = msg.text
             }
         }
     }
@@ -139,44 +129,34 @@ class MessageAdapter(
         fun bind(msg: Message, time: String) {
             messageTime.text = time
 
-            when {
-                !msg.imageBase64.isNullOrEmpty() -> {
-                    messageText.visibility = View.GONE
-                    messageImage.visibility = View.VISIBLE
-                    val bytes = Base64.decode(msg.imageBase64, Base64.DEFAULT)
-                    Glide.with(itemView.context)
-                        .asBitmap()
-                        .load(bytes)
-                        .into(messageImage)
+            if (!msg.imageBase64.isNullOrEmpty()) {
+                messageText.visibility = View.GONE
+                messageImage.visibility = View.VISIBLE
+                val bytes = Base64.decode(msg.imageBase64, Base64.DEFAULT)
+                Glide.with(itemView.context)
+                    .asBitmap()
+                    .load(bytes)
+                    .into(messageImage)
 
-                    messageImage.setOnClickListener {
-                        val intent = Intent(itemView.context, ImagePreviewActivity::class.java)
-                        intent.putExtra("imageBase64", msg.imageBase64)
-                        itemView.context.startActivity(intent)
-                    }
+                messageImage.setOnClickListener {
+                    val intent = Intent(itemView.context, ImagePreviewActivity::class.java)
+                    intent.putExtra("imageBase64", msg.imageBase64)
+                    itemView.context.startActivity(intent)
                 }
 
-                !msg.fileBase64.isNullOrEmpty() && !msg.fileName.isNullOrEmpty() -> {
-                    messageImage.visibility = View.VISIBLE
-                    messageText.visibility = View.VISIBLE
-
-                    messageImage.setImageResource(R.drawable.ic_file)
-                    messageText.text = msg.fileName
-
-                    messageImage.setOnClickListener {
-                        FileHelper.openFile(itemView.context, msg.fileBase64, msg.fileName)
-                    }
-
-                    messageText.setOnClickListener {
-                        FileHelper.openFile(itemView.context, msg.fileBase64, msg.fileName)
-                    }
+            } else if (!msg.fileBase64.isNullOrEmpty()) {
+                messageImage.visibility = View.GONE
+                messageText.visibility = View.VISIBLE
+                messageText.text = "📎 ${msg.fileName}"
+                messageText.setOnClickListener {
+                    // FIXED: assert non-null
+                    FileHelper.openFile(itemView.context, msg.fileBase64!!, msg.fileName!!)
                 }
 
-                else -> {
-                    messageImage.visibility = View.GONE
-                    messageText.visibility = View.VISIBLE
-                    messageText.text = msg.text
-                }
+            } else {
+                messageImage.visibility = View.GONE
+                messageText.visibility = View.VISIBLE
+                messageText.text = msg.text
             }
         }
     }

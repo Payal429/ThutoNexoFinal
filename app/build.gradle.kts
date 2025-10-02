@@ -85,4 +85,8 @@ dependencies {
 
     // Firebase Storage
     implementation("com.google.firebase:firebase-storage-ktx")
+
+    //Pushy
+    implementation("me.pushy:sdk:1.0.104")
+
 }

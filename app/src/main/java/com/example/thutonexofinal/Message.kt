@@ -2,6 +2,7 @@ package com.example.thutonexofinal
 
 data class Message(
     val senderId: String = "",
+    val receiverId: String = "",
     val text: String = "",
     val timestamp: Long = 0,
     val read: Boolean = false,

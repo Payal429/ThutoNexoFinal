@@ -2,6 +2,7 @@ package com.example.thutonexofinal
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -9,13 +10,16 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import com.example.thutonexofinal.databinding.ActivityProfileSetupBinding
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import me.pushy.sdk.Pushy
 import java.io.ByteArrayOutputStream
 import java.util.*
 
@@ -33,6 +37,8 @@ class ProfileSetupActivity : AppCompatActivity() {
     private var selectedImageUri: Uri? = null
     private var selectedImageBase64: String? = null
 
+    private var deviceToken: String? = null
+
     companion object {
         private const val TAG = "ProfileSetupActivity"
         private const val PICK_IMAGE_REQUEST = 1001
@@ -49,9 +55,26 @@ class ProfileSetupActivity : AppCompatActivity() {
         firestore = FirebaseFirestore.getInstance()
         storage = FirebaseStorage.getInstance()
 
+        // --- Toolbar setup ---
+        val toolbar = binding.topAppBar
+        setSupportActionBar(toolbar)
+        supportActionBar?.title = "Profile Setup"
+        supportActionBar?.setDisplayShowTitleEnabled(true)
+
+        // Make toolbar title bold with custom font
+        for (i in 0 until toolbar.childCount) {
+            val child = toolbar.getChildAt(i)
+            if (child is TextView && child.text == toolbar.title) {
+                child.setTypeface(child.typeface, android.graphics.Typeface.BOLD)
+                val typeface = ResourcesCompat.getFont(this, R.font.anek_gujarati_bold)
+                child.typeface = typeface
+                break
+            }
+        }
+
         // Toolbar back button
-        val toolbar = findViewById<MaterialToolbar>(R.id.topAppBar)
         toolbar.setNavigationOnClickListener { onBackPressed() }
+
 
         // Select image button
         binding.btnSelectImage.setOnClickListener {
@@ -62,6 +85,42 @@ class ProfileSetupActivity : AppCompatActivity() {
         binding.btnSave.setOnClickListener {
             saveProfile()
         }
+
+        // Request notification permission for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(
+                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                    1002
+                )
+            }
+        }
+
+        // Start Pushy background service
+        Pushy.listen(this)
+
+        //Register device token with Pushy in the background
+        Thread {
+            try {
+                deviceToken = Pushy.register(this)
+                // Log it or send it to your server
+                runOnUiThread {
+                    Log.d(TAG, "Pushy device token: $deviceToken")
+//                    Toast.makeText(this, "Pushy Token: $deviceToken", Toast.LENGTH_LONG).show()
+                }
+
+            }catch (exc: Exception) {
+                exc.printStackTrace()
+                runOnUiThread {
+                    Log.e(TAG, "Pushy Registration Failed", exc)
+//                    Toast.makeText(this, "Pushy Registration Failed", Toast.LENGTH_LONG).show()
+                }
+            }
+        }.start()
+
+        // Start Pushy background service
+        Pushy.listen(this)
     }
 
     // Check permissions & open gallery
@@ -183,7 +242,8 @@ class ProfileSetupActivity : AppCompatActivity() {
                                 role,
                                 subjects,
                                 bio,
-                                downloadUrl.toString()
+                                downloadUrl.toString(),
+                                deviceToken
                             )
                         }.addOnFailureListener {
                             saveUserData(
@@ -193,15 +253,16 @@ class ProfileSetupActivity : AppCompatActivity() {
                                 role,
                                 subjects,
                                 bio,
-                                selectedImageBase64
+                                selectedImageBase64,
+                                deviceToken
                             )
                         }
                     }
                     .addOnFailureListener {
-                        saveUserData(userId, name, phone, role, subjects, bio, selectedImageBase64)
+                        saveUserData(userId, name, phone, role, subjects, bio, selectedImageBase64, deviceToken)
                     }
             } else {
-                saveUserData(userId, name, phone, role, subjects, bio, selectedImageBase64)
+                saveUserData(userId, name, phone, role, subjects, bio, selectedImageBase64, deviceToken)
             }
         } ?: run {
             Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show()
@@ -216,7 +277,8 @@ class ProfileSetupActivity : AppCompatActivity() {
         role: String,
         subjects: String,
         bio: String,
-        profileImage: String?
+        profileImage: String?,
+        deviceToken: String? = null
     ) {
         val userData = hashMapOf(
             "uid" to userId,
@@ -227,7 +289,8 @@ class ProfileSetupActivity : AppCompatActivity() {
             "bio" to bio,
             "email" to auth.currentUser?.email,
             "profileComplete" to true,
-            "profileImage" to profileImage
+            "profileImage" to profileImage,
+            "deviceToken" to deviceToken
         )
 
         firestore.collection("users")
@@ -249,4 +312,21 @@ class ProfileSetupActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
+//    // Handle permission result
+//    override fun onRequestPermissionsResult(
+//        requestCode: Int,
+//        permissions: Array<String>,
+//        grantResults: IntArray
+//    ) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//
+//        if (requestCode == 1002) {
+//            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                Log.d("MainActivity", "POST_NOTIFICATIONS permission granted ✅")
+//            } else {
+//                Log.w("MainActivity", "POST_NOTIFICATIONS permission denied ❌")
+//            }
+//        }
+//    }
 }
