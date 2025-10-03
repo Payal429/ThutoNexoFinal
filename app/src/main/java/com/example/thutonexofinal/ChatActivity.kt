@@ -26,12 +26,16 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 
+// Chat screen for messaging
 class ChatActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: MessageAdapter
+    // Holds chat messages
     private val messageList = mutableListOf<Message>()
+    // Firestore reference
     private val db = FirebaseFirestore.getInstance()
+    // Current logged-in user
     private val currentUserId = FirebaseAuth.getInstance().uid ?: ""
 
     private lateinit var chatId: String
@@ -41,6 +45,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var profileImage: ImageView
     private lateinit var usernameText: TextView
 
+    // Firestore listener for messages
     private var messageListener: ListenerRegistration? = null
     private val PICK_IMAGE_REQUEST = 1001
     private val PICK_FILE_REQUEST = 1002
@@ -48,27 +53,34 @@ class ChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // If no logged-in user, exit
         if (currentUserId.isEmpty()) {
             finish()
             return
         }
 
         setContentView(R.layout.activity_chat)
+
+        // Status bar color
         window.statusBarColor = getColor(R.color.green)
         window.decorView.systemUiVisibility = 0
 
+        // Get intent extras (chat info)
         chatId = intent.getStringExtra("chatId") ?: run { finish(); return }
         receiverUid = intent.getStringExtra("receiverId") ?: run { finish(); return }
         receiverName = intent.getStringExtra("receiverName") ?: run { finish(); return }
 
+        // Setup UI
         setupToolbar()
         setupRecyclerView()
         setupInputs()
 
+        // load Profile and messages
         loadReceiverProfile()
         loadMessages()
     }
 
+    // Mark all messages sent to current user as "read"
     private fun markMessagesAsRead(chatId: String) {
         val firestore = FirebaseFirestore.getInstance()
         firestore.collection("chats")
@@ -87,7 +99,7 @@ class ChatActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         markMessagesAsRead(chatId)
-        // Save current chat for notification suppression
+        // Save current chat to preferences (used to suppress duplicate notifications)
         val prefs = getSharedPreferences("chat_prefs", MODE_PRIVATE)
         prefs.edit().putString("current_chat_id", chatId).apply()
     }
@@ -98,6 +110,7 @@ class ChatActivity : AppCompatActivity() {
         prefs.edit().remove("current_chat_id").apply()
     }
 
+    // Toolbar setup with custom profile and name
     private fun setupToolbar() {
         val toolbar = findViewById<Toolbar>(R.id.chatToolbar)
         setSupportActionBar(toolbar)
@@ -112,6 +125,7 @@ class ChatActivity : AppCompatActivity() {
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
     }
 
+    // RecyclerView for chat messages
     private fun setupRecyclerView() {
         recyclerView = findViewById(R.id.messagesRecyclerView)
         adapter = MessageAdapter(listOf(), currentUserId)
@@ -119,12 +133,14 @@ class ChatActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
     }
 
+    // Input buttons setup (send, attach image, attach file)
     private fun setupInputs() {
         findViewById<ImageButton>(R.id.attachImageButton).setOnClickListener { pickImage() }
         findViewById<ImageButton>(R.id.sendButton).setOnClickListener { sendMessage() }
         findViewById<ImageButton>(R.id.attachFileButton)?.setOnClickListener { pickFile() }
     }
 
+    // Load receiver’s profile image from Firestore
     private fun loadReceiverProfile() {
         db.collection("users").document(receiverUid)
             .addSnapshotListener { snapshot, _ ->
@@ -141,7 +157,7 @@ class ChatActivity : AppCompatActivity() {
             }
     }
 
-    // ===== Image picking =====
+    // Image picking
     private fun pickImage() {
         if (PermissionHelper.hasStoragePermission(this)) {
             val intent = Intent(Intent.ACTION_PICK)
@@ -162,6 +178,7 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    // Handle image/file picker result
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != RESULT_OK || data == null) return
@@ -172,6 +189,7 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    // Send image message
     private fun sendImageMessage(uri: Uri) {
         contentResolver.openInputStream(uri)?.use { inputStream ->
             val bitmap = BitmapFactory.decodeStream(inputStream)
@@ -191,6 +209,7 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    // Send file message
     private fun sendFileMessage(uri: Uri) {
         val fileName = uri.lastPathSegment ?: "file"
         contentResolver.openInputStream(uri)?.use { inputStream ->
@@ -210,6 +229,7 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    // Send text message
     private fun sendMessage() {
         val input = findViewById<EditText>(R.id.messageInput)
         val text = input.text.toString().trim()
@@ -227,6 +247,8 @@ class ChatActivity : AppCompatActivity() {
 
         input.setText("")
     }
+
+    // Save message in Firestore + notify receiver via Pushy
     private fun sendAndNotify(message: Message, lastMessageText: String) {
         val chatRef = db.collection("chats").document(chatId)
         chatRef.collection("messages").add(message).addOnSuccessListener {
@@ -277,6 +299,7 @@ class ChatActivity : AppCompatActivity() {
     }*/
 
 
+    // Send Pushy notification via API
     private fun sendPushyNotification(deviceToken: String, message: String, senderName: String) {
         Thread {
             try {
@@ -313,6 +336,7 @@ class ChatActivity : AppCompatActivity() {
         }.start()
     }
 
+    // Load messages in real-time (with date headers)
     private fun loadMessages() {
         messageListener = db.collection("chats").document(chatId)
             .collection("messages").orderBy("timestamp", Query.Direction.ASCENDING)
@@ -353,6 +377,7 @@ class ChatActivity : AppCompatActivity() {
             }
     }
 
+    // Format message timestamps into Today/Yesterday/dd MMM yyyy
     private fun getFriendlyDate(timestamp: Long): String {
         val messageDate = Calendar.getInstance().apply { timeInMillis = timestamp }
         val today = Calendar.getInstance()
